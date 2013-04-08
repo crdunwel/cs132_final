@@ -5,7 +5,7 @@ var sequelize = new Sequelize('database', null, null,
         // the sql dialect of the database
         dialect: 'sqlite',
         // the storage engine for sqlite - default ':memory:'
-        storage: './chatroom.db'
+        storage: './temp.db'
     });
 
 var Message = sequelize.define('Message',
