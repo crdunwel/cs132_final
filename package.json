@@ -1,0 +1,16 @@
+{
+	"name": "Chatroom",
+	"description": "A web-based chatroom server.",
+	"version": "0.0.1",
+	"dependencies": 
+	{
+		"express": "3.0.x",
+		"any-db": "0.3.x",
+		"hogan.js": "2.0.x",
+		"consolidate": "0.7.x",
+		"sqlite3": "2.1.x",
+		"nunjucks": "0.1.x",
+		"sequelize":"1.4.1",
+		"bindings":"1.1.0"
+	}
+}
