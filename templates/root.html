@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% include "head-meta.html" %}
+        {% block meta %}{% endblock %}
+        {% include "head-js.html" %}
+        {% block jscripts %} {% endblock %}
+        {% include "head-css.html" %}
+        {% block css %} {% endblock %}
+    </head>
+    <body>
+        <div id="main-div">
+            {% block body %}
+            {% endblock %}
+        </div>
+    </body>
+</html>
