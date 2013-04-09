@@ -206,7 +206,6 @@ And finally on the client side (either in html file or separate client-side .js 
 
 If you've worked with sockets in Java before then the idea is essentially the same except we use an event-driven model here.  The server listens for connecting sockets and attaches event handlers on connection.  The client sends data with an event name and the server runs the callback for the corresponding event, often returning data back to the client (or all currently connected clients).  You're basically playing catch, pushing and pulling from client to server to client with callback functions to process the data (often passed in JSON format).
 
-  
+##Conclusion
 
-
-
+Let me know if you have any questions or can't get something in this guide to work properly.  I'm in no way an expert on git or nodejs or any of the modules I've listed by I have some knowledge and experience that I can share.  Also please let me know if you find better modules or if I'm doing something wrong or "the long way" - I'm always up for learning and improving!
