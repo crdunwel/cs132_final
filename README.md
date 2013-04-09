@@ -94,6 +94,8 @@ The "static/" directory contains subdirectories for "css/", "js/", "images/", an
 
 The "template/" directory contains our html templates.  The syntax for the templates is that of the Python-powered jinja2 templating engine and the node module handling this is nunjucks (http://nunjucks.jlongster.com/).  It's really easy once you get used to it.
 
+##Technologies Guide
+
 ###SASS
 
 Check out http://sass-lang.com/.  SASS allows for more abstracted and concise CSS and you should definitely use it.
