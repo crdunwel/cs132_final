@@ -1,3 +1,9 @@
+/**
+ * Example file for how to define our models.
+ * Check out http://www.sequelizejs.com/ for more advanced
+ * functionality
+ */
+
 var Sequelize = require("sequelize");
 
 var sequelize = new Sequelize('database', null, null,

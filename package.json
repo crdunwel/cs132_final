@@ -11,6 +11,7 @@
 		"sqlite3": "2.1.x",
 		"nunjucks": "0.1.x",
 		"sequelize":"1.4.1",
-		"bindings":"1.1.0"
+		"bindings":"1.1.0",
+		"socket.io":"*"
 	}
 }
