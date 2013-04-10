@@ -232,6 +232,87 @@ The optionsMap can contain three options, one of which is enableHighAccuracy.  W
 
 See http://diveintohtml5.info/geolocation.html for more information.
 
+###CLIENT-SIDE TEMPLATES
+
+Sometimes you may want to dynamically generate small pieces of HTML without having to communicate with the server.  One solution is to concatenate strings in javascript code but this doesn't serve well to separate logic from presentation and after writing
+
+```
+var toReturn += "<h3>" + textlist[0].title + "</h3><p class='classname'>" + textlist[0].text + "</p>"
+```
+
+so many times you may start to wonder if there is a better way.  Fortunately there is with client-side templating. There are two good javascript libraries that I know.  See Mustache https://github.com/janl/mustache.js and the jquery wrapper Chevron https://github.com/postal2600/jquery-chevron.
+
+Using Mustache and Chevron is easy. Add this to to your .html <header>.  Notice I'm using google for jQuery.
+
+```
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript" src="js/mustache.js"></script>
+<script type="text/javascript" src="js/chevron.js"></script>
+```
+
+Then you can include any number of templates in the <header> as well.  Here is an example from my Bieberfeed.
+
+```
+<link href="templates/tweetTemplate.html" rel="template" id="tweetTemplate"/>
+```
+
+And the template "tweetTemplates.html" looks like this.
+
+```
+<div class="tweetEle_wrapper" id="{{ id }}">
+    <div class="tweetEle_inner">
+
+        <img class="tweet_img" src="{{ user.profile_image_url }}" />
+
+        <div class="tweetEle_text">
+
+            <div class="tweetEle_text_header">
+                <a class="tweet_name" href="http://www.twitter.com/{{user.screen_name}}">{{ user.name}}</a>
+                <span class="tweet_screen_name">@{{ user.screen_name}}</span>
+                <span class="tweet_num_followers">{{ user.followers_count}} followers</span>
+            </div>
+
+            <p class="tweetEle_text_body">
+                {{{ text }}}
+            </p>
+
+            <div class="tweetEle_text_footer">
+                <span class="tweetEle_source">Posted from {{{ source }}}</span>
+                <a class="tweet_relative_time" title="{{created_at}}">{{ created_at_hum }}</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+```
+
+You can render the template in javascript as followed.   Again I've used my Bieberfeed code as an example.
+
+```
+// preload templates
+$.Chevron("preload");
+
+...
+
+// turn urls into anchors
+dataItem['text'] = dataItem['text'].linkify();
+
+// make dates more human readable
+dataItem['created_at_hum'] = humanize.relativeTime(Date.parse(dataItem['created_at'])/1000, basetime);
+
+// render HTML from template with JSON data and prepend to div container
+$('#tweetTemplate').Chevron("render", dataItem, function(result)
+{
+    if (dataItem['user']['followers_count'] < $tweetOption_popBreak.val()) 
+    {
+        $tweets_scrubs.prepend($(result).fadeIn(1500)); 
+    }
+    else { $tweets_pros.prepend($(result).fadeIn(1500)); }
+});
+```
+
+Notice I'm passing a javascript object with 'text' and 'created_at_hum' that corresponde to variable names in {{ ... }} and {{{ ... }}}.  This will render the HTML with the values you pass in.  The difference between {{ ... }} and {{{ ... }}} is the triple bracket won't escape HTML.
+
 ##Conclusion
 
 Let me know if you have any questions or can't get something in this guide to work properly.  I'm in no way an expert on git or nodejs or any of the modules I've listed by I have some knowledge and experience that I can share.  Also please let me know if you find better modules or if I'm doing something wrong or "the long way" - I'm always up for learning and improving!
