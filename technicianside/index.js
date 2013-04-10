@@ -4,7 +4,6 @@ var increaseCutoff = 200.0;
 var minColor = 30;
 var speakerRadius = 10;
 var selectedSpeaker = -1;
-var g = new jsGraphics("map");
 var speakers = new Array();
 
 speakers.push({"id" : "BLAH0", "x" : 120, "y" : 170, "radius" : 40, "volumeUp" : 100, "volumeDown" : 200});
@@ -32,7 +31,7 @@ for (var i = 0; i < speakers.length; i++){
 	newspeaker.style.height = speakerRadius*2 + "px";
 	newspeaker.style.backgroundColor = getColorFromFeedback(speaker.volumeUp - speaker.volumeDown);
 	//closure to make this work properly
-	if (typeof window.addEventListener === 'function'){
+	//if (typeof window.addEventListener === 'function'){
         (function (_speaker) {
             speaker["element"].addEventListener('click', function(){
 				var infopane = document.getElementById("infopane");
@@ -40,17 +39,31 @@ for (var i = 0; i < speakers.length; i++){
 				infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
 				infopane.innerHTML += "<p>Volume Up: " + _speaker.volumeUp + "</p";
 				infopane.innerHTML += "<p>Volume Down: " + _speaker.volumeDown + "</p>";
-				infopane.innerHTML += "<p>Net: " + (speaker.volumeUp - speaker.volumeDown) + "</p>";
+				infopane.innerHTML += "<p>Net: " + (_speaker.volumeUp - _speaker.volumeDown) + "</p>";
 				infopane.innerHTML += "<p>Radius: " + _speaker.radius + "</p>";
+				selectedSpeaker = _speaker.id;
+				var button = document.createElement("button");
+				button.innerHTML = "Reset Data";
+				(function (_button) {
+					button.addEventListener('click', function(){
+						resetData();
+					});
+				})(button);
+				infopane.appendChild(button);
             });
         })(speaker);
-    }
+    //}
 	map.appendChild(newspeaker);
+}
+
+function resetData(){
+	console.log(selectedSpeaker);
 }
 
 function getColorFromFeedback(amount){
 	//need to decrease, meaning negative amount
 	var red = parseInt(-Math.min(Math.max(amount, -decreaseCutoff), 0)*(255.0 - minColor)/decreaseCutoff) + minColor;
+	
 	//need to increase, meaning positive amount
 	var blue = parseInt(Math.max(Math.min(amount, increaseCutoff), 0)*(255.0 - minColor)/increaseCutoff) + minColor;
 	//neutral
