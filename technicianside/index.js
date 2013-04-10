@@ -6,6 +6,8 @@ var speakerRadius = 10;
 var selectedSpeaker = -1;
 var speakers = new Array();
 
+//get request from server to get speaker data and map image
+
 speakers.push({"id" : "BLAH0", "x" : 120, "y" : 170, "radius" : 40, "volumeUp" : 100, "volumeDown" : 200});
 speakers.push({"id" : "BLAH1", "x" : 120, "y" : 250, "radius" : 40, "volumeUp" : 0, "volumeDown" : 150});
 speakers.push({"id" : "BLAH2", "x" : 190, "y" : 240, "radius" : 40, "volumeUp" : 1000, "volumeDown" : 1100});
@@ -31,33 +33,33 @@ for (var i = 0; i < speakers.length; i++){
 	newspeaker.style.height = speakerRadius*2 + "px";
 	newspeaker.style.backgroundColor = getColorFromFeedback(speaker.volumeUp - speaker.volumeDown);
 	//closure to make this work properly
-	//if (typeof window.addEventListener === 'function'){
-        (function (_speaker) {
-            speaker["element"].addEventListener('click', function(){
-				var infopane = document.getElementById("infopane");
-				infopane.innerHTML = "<h3>Speaker Information for:</h3>"
-				infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
-				infopane.innerHTML += "<p>Volume Up: " + _speaker.volumeUp + "</p";
-				infopane.innerHTML += "<p>Volume Down: " + _speaker.volumeDown + "</p>";
-				infopane.innerHTML += "<p>Net: " + (_speaker.volumeUp - _speaker.volumeDown) + "</p>";
-				infopane.innerHTML += "<p>Radius: " + _speaker.radius + "</p>";
-				selectedSpeaker = _speaker.id;
-				var button = document.createElement("button");
-				button.innerHTML = "Reset Data";
-				(function (_button) {
-					button.addEventListener('click', function(){
-						resetData();
-					});
-				})(button);
-				infopane.appendChild(button);
-            });
-        })(speaker);
-    //}
+	(function (_speaker) {
+		_speaker["element"].addEventListener('click', function(){
+			var infopane = document.getElementById("infopane");
+			infopane.innerHTML = "<h3>Speaker Information for:</h3>"
+			infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
+			infopane.innerHTML += "<p>Volume Up: " + _speaker.volumeUp + "</p";
+			infopane.innerHTML += "<p>Volume Down: " + _speaker.volumeDown + "</p>";
+			infopane.innerHTML += "<p>Net: " + (_speaker.volumeUp - _speaker.volumeDown) + "</p>";
+			infopane.innerHTML += "<p>Radius: " + _speaker.radius + "</p>";
+			selectedSpeaker = _speaker.id;
+			var button = document.createElement("button");
+			button.innerHTML = "Reset Data";
+			(function (_button) {
+				button.addEventListener('click', function(){
+					resetData();
+				});
+			})(button);
+			infopane.appendChild(button);
+		});
+	})(speaker);
 	map.appendChild(newspeaker);
 }
 
 function resetData(){
 	console.log(selectedSpeaker);
+	//send message to server to reset data for the selected speaker.
+	//only remove the amount that the speaker has in the front-end, anything new on the server should remain.
 }
 
 function getColorFromFeedback(amount){
