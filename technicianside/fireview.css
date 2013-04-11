@@ -1,0 +1,30 @@
+html{
+	min-width: 800px;
+}
+
+#mappane{
+	width: 60%;
+	height: 600px;
+	display:inline-block;
+}
+
+#fireInfoPane{
+	margin-left: 10px;
+	position: fixed;
+	width: 39%;
+	height: 600px;
+	display:inline-block;
+	vertical-align: top;
+}
+
+#fireInfoPane h3{
+	margin: 5px 0px 5px 0px;
+}
+
+#fireInfoPane p{
+	margin: 2px 0px 2px 0px;
+}
+
+.fire{
+	border-radius: 10px;
+}
