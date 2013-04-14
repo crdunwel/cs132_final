@@ -25,14 +25,14 @@ module.exports = function(io)
         accept(null, true);
     });
 
-
+    // bind events to socket
     io.sockets.on('connection', function (client)
     {
         // Event to run user first connects
         client.on('connected', function (name, fn)
         {
             console.log(client.id);
-            // get song info from database
+            // TODO get song info from database
         });
 
         // Event to run when feed fire button is clicked
@@ -52,7 +52,7 @@ module.exports = function(io)
 
         });
 
-        // Event to run when volume buttons are pressed
+        // Event to run when volume slider is slid and stays still for certain number of seconds
         client.on('volume', function (msg, fn)
         {
             var obj = JSON.parse(msg);
@@ -68,9 +68,5 @@ module.exports = function(io)
             });
 
         });
-
     });
 };
-
-
-

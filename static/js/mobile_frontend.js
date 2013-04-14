@@ -1,67 +1,68 @@
 $(document).ready(function()
 {
-
-    var $volumeBar = $('#volumeBar');
-
-    var timeout;
-    $volumeBar.slider({min: 1,max: 100, range:'min', value:50, slide:function(){clearTimeout(timeout);timeout = setTimeout(sendVolume,2000)}});
-    function sendVolume()
-    {
-
-        navigator.geolocation.getCurrentPosition(function(position)
-        {
-            position.dir = $volumeBar.slider("value");
-            socket.emit('volume', JSON.stringify(position), function(bool)
-            {
-                // do something with returned bool value
-            });
-        },
-
-        function(error)
-        {
-
-        },
-
-        {enableHighAccuracy:true});
-    }
-
-
+    // connect socket to server
     var socket = io.connect('http://localhost:8080');
 
     socket.on('connect', function ()
     {
         socket.emit('connected', '', function (data)
         {
-            // get current song info
+            // TODO get current song info
             var obj = JSON.parse(data);
             console.log(obj);
         });
     });
 
-    $('#feedFireButton').click(function()
+    // jquery selectors
+    var $volumeBar = $('#volumeBar');
+    var $feedFireButton = $('#feedFireButton');
+
+    var sliderTimeout;    // used for timeout of slider so user isn't sending 100's of request to server.
+    $volumeBar.slider({
+        min: 1,
+        max: 100,
+        range:'min',
+        value:50,
+        slide:function() {clearTimeout(sliderTimeout);sliderTimeout = setTimeout(sendVolume, 2000)}
+    });
+
+    function sendVolume()
     {
-        navigator.geolocation.getCurrentPosition(function(position)
+        navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
+
+        function success(position)
+        {
+            position.dir = $volumeBar.slider("value");
+            socket.emit('volume', JSON.stringify(position), function(bool)
+            {
+                // TODO do something with returned bool value
+            });
+        }
+
+        function error(error)
+        {
+            // TODO handle case where no GPS present
+        }
+
+    }
+
+    $feedFireButton.click(function()
+    {
+        navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
+
+        function success(position)
         {
             socket.emit('feedFire', JSON.stringify(position), function(bool)
             {
-                // do something with returned bool value
+                // TODO do something with returned bool value
             });
-        },
+        }
 
-        function(error)
+        function error(error)
         {
-
-        },
-
-        {enableHighAccuracy:true});
-    });
-
-    $('.volumeButton').click(function()
-    {
+            // TODO handle GPS error
+        }
 
     });
-
-
-
 
 });

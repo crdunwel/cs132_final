@@ -23,7 +23,6 @@ function ajaxRender(response, pageName, kwargs)
     return bodyTemplate.render(kwargs);
 }
 
-
 // Object to map pages to output.
 module.exports =
 {
@@ -34,12 +33,12 @@ module.exports =
 
     mainPage: function mainPage(request, response)
     {
-        response.render('root.html',{});
+        render(response, arguments.callee.name);
     },
 
     techPage: function techPage(request, response)
     {
-        response.render('root.html',{'body':'../technicianside/index.html'});
+        render(response, arguments.callee.name);
     },
 
     clientPage: function clientPage(request, response)
@@ -77,5 +76,3 @@ function objectMerge()
     }
     return out;
 }
-
-
