@@ -42,7 +42,7 @@ module.exports = function(io)
             console.log(obj);
 
             // TODO need to first check if user with session ID already exists
-            models.Location.create({longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
+            models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
             {
                 models.FeedFire.create({feed:true,LocationId:location.id}).success(function(feedFire)
                 {
@@ -59,9 +59,9 @@ module.exports = function(io)
             console.log(obj);
 
             // TODO need to first check if user with session ID already exists
-            models.Location.create({longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
+            models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
             {
-                models.Volume.create({dir:obj.dir,LocationId:location.id}).success(function(volume)
+                models.Volume.create({dir:obj.dir, LocationId:location.id}).success(function(volume)
                 {
                     fn(true);
                 });

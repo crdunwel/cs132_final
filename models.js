@@ -17,6 +17,7 @@ var sequelize = new Sequelize('database', null, null,
 var Location = sequelize.define('Location',
     {
         id: { type: Sequelize.INTEGER, autoIncrement: true },
+        client_id: { type: Sequelize.INTEGER, autoIncrement: true },
         longitude: Sequelize.FLOAT,
         latitude: Sequelize.FLOAT
     }
