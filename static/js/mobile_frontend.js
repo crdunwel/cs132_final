@@ -19,12 +19,22 @@ $(document).ready(function()
 
     var sliderTimeout;    // used for timeout of slider so user isn't sending 100's of request to server.
     $volumeBar.slider({
-        min: 1,
+        min: 0,
         max: 100,
         range:'min',
         value:50,
-        slide:function() {clearTimeout(sliderTimeout);sliderTimeout = setTimeout(sendVolume, 2000)}
+        step:1,
+        slide:function(event,ui)
+        {
+            //$slider_handle.text(ui.value);
+            clearTimeout(sliderTimeout);
+            sliderTimeout = setTimeout(sendVolume, 2000)
+        }
     });
+
+    var $slider_handle = $('.ui-slider-handle');
+    //$slider_handle.text($volumeBar.slider("value"));
+    $slider_handle.css({'text-decoration':'none','text-align':'center'});
 
     function sendVolume()
     {
