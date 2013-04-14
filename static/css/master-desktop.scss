@@ -1,0 +1,48 @@
+@import "master";
+
+$width:1040px;
+
+div#main-div
+{
+  width:$width;
+  margin:auto;
+  text-align:center;
+}
+
+button#feedFireButton
+{
+  width:240px;
+  font-size:24px;
+  margin:auto;
+}
+
+button
+{
+  margin:auto;
+  font-size:18px;
+
+  width:125px;
+  padding:10px;
+  font-family:"sonus";
+}
+
+h2
+{
+  span
+  {
+    font-size:18px;
+
+
+  }
+
+}
+
+h3
+{
+  span
+  {
+    font-weight:lighter;
+
+  }
+
+}

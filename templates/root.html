@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
-        {% include "head-meta.html" %}
         {% block meta %}{% endblock %}
-        {% include "head-js.html" %}
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"/>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
         {% block jscripts %} {% endblock %}
-        {% include "head-css.html" %}
+        <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="/static/css/master-mobile.css" />
+        <link rel="stylesheet" type="text/css" media="(min-width: 800px)" href="/static/css/master-desktop.css"/>
         {% block css %} {% endblock %}
     </head>
     <body>
         <div id="main-div">
             {% block body %}
+
             {% endblock %}
         </div>
     </body>

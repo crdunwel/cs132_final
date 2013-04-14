@@ -14,13 +14,34 @@ var sequelize = new Sequelize('database', null, null,
         storage: './temp.db'
     });
 
-var Message = sequelize.define('Message',
+var Location = sequelize.define('Location',
     {
-        room: Sequelize.STRING,
-        nickname: Sequelize.STRING,
-        body:Sequelize.TEXT
+        id: { type: Sequelize.INTEGER, autoIncrement: true },
+        longitude: Sequelize.FLOAT,
+        latitude: Sequelize.FLOAT
     }
 );
 
+var FeedFire = sequelize.define('FeedFire',
+    {
+        id: { type: Sequelize.INTEGER, autoIncrement: true },
+        feed: Sequelize.BOOLEAN
+    },
+    {
+        timestamps: false
+    }).belongsTo(Location);
+
+
+var Volume = sequelize.define('Volume',
+    {
+        id: { type: Sequelize.INTEGER, autoIncrement: true },
+        dir: Sequelize.INTEGER
+    },
+    {
+        timestamps: false
+    }).belongsTo(Location);
+
 sequelize.sync({force: true});
-exports.Message = Message;
+exports.Location = Location;
+exports.FeedFire = FeedFire;
+exports.Volume = Volume;
