@@ -9,9 +9,17 @@ div#main-div
   text-align:center;
 }
 
+div#mobileWrapper
+{
+  width:250px;
+  margin:auto;
+  margin-top:50px;
+  border: 1px solid black;
+}
+
 button#feedFireButton
 {
-  width:240px;
+  width:250px;
   font-size:24px;
   margin:auto;
 }
@@ -20,7 +28,6 @@ button
 {
   margin:auto;
   font-size:18px;
-
   width:125px;
   padding:10px;
   font-family:"sonus";
@@ -31,10 +38,7 @@ h2
   span
   {
     font-size:18px;
-
-
   }
-
 }
 
 h3
@@ -42,7 +46,5 @@ h3
   span
   {
     font-weight:lighter;
-
   }
-
 }
