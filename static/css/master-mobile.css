@@ -1,0 +1,15 @@
+@font-face {
+  font-family: "sonus";
+  src: url("../resources/SonusLig.otf"); }
+
+body {
+  margin: 0 0 0 0;
+  padding: 0;
+  width: 100%;
+  font-family: "sonus","Helvetica",sans-serif; }
+
+div#main-div {
+  width: auto; }
+
+button {
+  width: auto; }

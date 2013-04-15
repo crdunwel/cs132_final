@@ -12,6 +12,8 @@
 		"nunjucks": "0.1.x",
 		"sequelize":"1.4.1",
 		"bindings":"1.1.0",
-		"socket.io":"*"
+		"socket.io":"*",
+		"connect":"*",
+		"cookie":"*"
 	}
 }
