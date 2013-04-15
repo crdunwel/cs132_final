@@ -8,8 +8,11 @@ var fires = new Array();
 
 //get request from server to get speaker data and map image
 
-fires.push({"id" : "BLAH0", "x" : 120, "y" : 170, "radius" : 40, "needsFed" : 0});
-
+fires.push({"id" : "FIRE0", "x" : 120, "y" : 170, "radius" : 40, "needsFed" : 0});
+fires.push({"id" : "FIRE1", "x" : 150, "y" : 180, "radius" : 40, "needsFed" : 200});
+fires.push({"id" : "FIRE2", "x" : 150, "y" : 250, "radius" : 40, "needsFed" : 150});
+fires.push({"id" : "FIRE3", "x" : 180, "y" : 200, "radius" : 40, "needsFed" : 100});
+fires.push({"id" : "FIRES4", "x" : 115, "y" : 230, "radius" : 40, "needsFed" : 50});
 
 var map = document.getElementById("map");
 document.getElementById("mappane").style.backgroundImage = "url(map.png)";
@@ -56,24 +59,21 @@ function resetData(){
 
 function getColorFromFeedback(amount){
 	//need to decrease, meaning negative amount
-	var red = parseInt(-Math.min(Math.max(amount, -decreaseCutoff), 0)*(255.0 - minColor)/decreaseCutoff) + minColor;
+	var red = 255-amount;
+	if(red<25){
+		red = 25;
+	}
 	
 	//need to increase, meaning positive amount
-	var blue = parseInt(Math.max(Math.min(amount, increaseCutoff), 0)*(255.0 - minColor)/increaseCutoff) + minColor;
+	var blue = amount/2;
+	if(blue>255){
+		blue = 255;
+	}
 	//neutral
-	var green = 0;
-	if (blue > minColor){
-		green = Math.max(0, 255 - minColor - blue) + minColor;
+	var green = amount/2;
+	if(green>255){
+		green = 255;
 	}
-	else{
-		if (red > 255/2){
-			green = Math.max(0, (255 - red)*2);
-		}
-		else{
-			green = 255;
-		}
-	}
-	
 	var redString = red.toString(16);
 	var blueString = blue.toString(16);
 	var greenString = green.toString(16);
