@@ -5,32 +5,35 @@ var minColor = 30;
 var fireRadius = 10;
 var selectedFire = -1;
 var fires = new Array();
-
+var map;
+function initialize() {
+        var mapOptions = {
+          center: new google.maps.LatLng(41.8265, -71.4140),
+          zoom: 18,
+          mapTypeId: google.maps.MapTypeId.HYBRID
+        };
+        map = new google.maps.Map(document.getElementById("mappane"),
+            mapOptions);
+      }
+initialize();
 //get request from server to get speaker data and map image
 
-fires.push({"id" : "FIRE0", "x" : 120, "y" : 170, "radius" : 40, "needsFed" : 0});
-fires.push({"id" : "FIRE1", "x" : 150, "y" : 180, "radius" : 40, "needsFed" : 200});
-fires.push({"id" : "FIRE2", "x" : 150, "y" : 250, "radius" : 40, "needsFed" : 150});
-fires.push({"id" : "FIRE3", "x" : 180, "y" : 200, "radius" : 40, "needsFed" : 100});
-fires.push({"id" : "FIRES4", "x" : 115, "y" : 230, "radius" : 40, "needsFed" : 50});
-
-var map = document.getElementById("map");
-document.getElementById("mappane").style.backgroundImage = "url(map.png)";
+fires.push({"id" : "FIRE0", "x" : 41.8265, "y" : -71.4140, "radius" : 40, "needsFed" : 0});
+fires.push({"id" : "FIRE1", "x" : 41.8270, "y" : -71.4140, "radius" : 40, "needsFed" : 0});
+//color system may have to be changed
 for (var i = 0; i < fires.length; i++){
 	var fire = fires[i];
+	var myLatLng = new google.maps.LatLng(fire.x, fire.y);
+	var fireMarker = new google.maps.Marker({
+		position: myLatLng,
+		map: map
+	});
+
 	var newfire = document.createElement('div');
 	fire["element"] = newfire;
-	newfire.id = fire.id;
-	newfire.className = "fire"
-	newfire.style.position = "absolute";
-	newfire.style.left = fire.x + "px";
-	newfire.style.top = fire.y + "px";
-	newfire.style.width = fireRadius*2 + "px";
-	newfire.style.height = fireRadius*2 + "px";
-	newfire.style.backgroundColor = getColorFromFeedback(fire.needsFed);
 	//closure to make this work properly
 	(function (_fire) {
-		_fire["element"].addEventListener('click', function(){
+		google.maps.event.addListener(fireMarker, 'click', function(){
 			console.log("clicked");
 			var infopane = document.getElementById("fireInfoPane");
 			infopane.innerHTML = "<h3>Fire Information for:</h3>"
@@ -48,9 +51,8 @@ for (var i = 0; i < fires.length; i++){
 			infopane.appendChild(button);
 		});
 	})(fire);
-	map.appendChild(newfire);
+	//map.appendChild(newfire);
 }
-
 function resetData(){
 	console.log(selectedSpeaker);
 	//send message to server to reset data for the selected speaker.
