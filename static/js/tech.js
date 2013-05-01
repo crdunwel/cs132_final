@@ -42,7 +42,7 @@ function createMarker(speaker, lat, lng){
 	//closure to make this work properly
 	(function (_speaker) {
 		google.maps.event.addListener(speakerMarker, 'click', function(){
-			var infopane = document.getElementById("infopane");
+			var infopane = document.getElementById("speakerinfopane");
 			infopane.innerHTML = "<h3>Speaker Information for:</h3>"
 			infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
 			infopane.innerHTML += "<p>Volume Up: " + _speaker.volumeUp + "</p>";

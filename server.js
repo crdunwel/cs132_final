@@ -28,6 +28,7 @@ app.configure(function()
 // URL matching
 app.get('/technician',views.techPage);
 app.get('/client', views.clientPage);
+app.get('/', views.clientPage);
 
 // launch server
 server.listen(port, function()
