@@ -4,6 +4,7 @@ var models = require('./models.js');
 
 module.exports = function(io)
 {
+
     // Authorize web socket from session id
     io.set('authorization', function (handshakeData, accept)
     {
@@ -28,37 +29,63 @@ module.exports = function(io)
     // bind events to socket
     io.sockets.on('connection', function (client)
     {
+	function sendData(tech){
+		var speakers;
+		var fires;
+		models.Speaker.findAll().success(function(s) {
+			speakers = s;
+			models.Fire.findAll().success(function(f) {
+				fires = f;
+				var data = {'speakers' : speakers, 'fires' : fires};
+				tech.emit('data', data);
+			});
+		});
+	}
+	
 	//tech socket events
 	client.on('updateTechData', function (){
-		console.log("updatedData");
-		//get the data from the database, send it back to the client
-		client.emit('data', null);
+		sendData(client);
         });
 
 	client.on('resetSpeakerData', function(speaker){
-		console.log("resetSpeakerData");
-		//reset data for the speaker, send back everything
-		client.emit('data', null);
+		models.Speaker.find(speaker.id).success(function(s) {
+		    s.updateAttributes({
+		      volumeUp: 0,
+		      volumeDown: 0
+		    }).success(function() {
+			 sendData(client)
+		       });
+		})
 	});
 
 	client.on('resetFireData', function(fire){
-		console.log("resetFireData");
-		//reset data for the fire, send back everything
-		client.emit('data', null);
+		models.Fire.find(fire.id).success(function(f) {
+		    f.updateAttributes({
+		      needsFed: 0
+		    }).success(function() {
+			sendData(client)
+		       });
+		})
 	});
 
-	client.on('newSpeaker', function(speaker){
-		console.log("newSpeaker");
-		console.log(speaker);
-		//add a new speaker to the database
-		client.emit('data', null);
+	client.on('newSpeaker', function(lat, lng){
+		models.Speaker.create({"latitude" : lat, "longitude" : lng, "volumeUp" : 100, "volumeDown" : 0}).success(function(){
+			sendData(client);
+		});
 	});
 
-	client.on('newFire', function(fire){
-		console.log("newFire");
-		console.log(fire);
-		//add a new fire to the database
-		client.emit('data', null);
+	client.on('newFire', function(lat, lng){
+		models.Fire.create({"latitude" : lat, "longitude" : lng, "needsFed" : 50}).success(function(){
+			sendData(client);
+		});
+	});
+
+	client.on('removeSpeaker', function(speaker){
+		models.Speaker.find(speaker.id).success(function(s){if (s) {s.destroy(); sendData(client);}});
+	});
+
+	client.on('removeFire', function(fire){
+		models.Fire.find(fire.id).success(function(f){if (f) {f.destroy(); sendData(client);}});
 	});
 
 
