@@ -8,14 +8,18 @@ Technician control
 <script type ="text/javascript"
 	src="https://maps.googleapis.com/maps/api/js?sensor=false">
 </script>
+<script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
+	<h1>Technician Control</h1>
+
 	<div id = "mappane">
 		<div id="map" style="position:relative;">
 		</div>
 	</div>
 	<div id="infopane">
+		<button type="button" id="toggleView">View Speakers</button>
 		<div id="speakerinfopane">
 			
 		</div>

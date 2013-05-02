@@ -5,39 +5,95 @@ var minColor = 30;
 var speakerRadius = 10;
 var selectedSpeaker = -1;
 var speakers = new Array();
+var fires = new Array();
+var markers = new Array();
 var map;
+var viewFires = true;
+var socket = io.connect();
+
+//get request from server to get speaker data and map image
+speakers.push({"id" : "BLAH0", "x" : 41.8265, "y" : -71.4140, "radius" : 40, "volumeUp" : 100, "volumeDown" : 200});
+speakers.push({"id" : "BLAH1", "x" : 41.8270, "y" : -71.4140, "radius" : 40, "volumeUp" : 0, "volumeDown" : 150});
+fires.push({"id" : "FIRE0", "x" : 41.8265, "y" : -71.4140, "needsFed" : 0});
+fires.push({"id" : "FIRE1", "x" : 41.8265, "y" : -71.4140, "needsFed" : 0});
+
 function initialize() {
         var mapOptions = {
           center: new google.maps.LatLng(41.8265, -71.4140),
           zoom: 18,
           mapTypeId: google.maps.MapTypeId.HYBRID,
-	  disableDoubleClickZoom: true
+	  disableDoubleClickZoom: true,
+	  streetViewControl: false
         };
         map = new google.maps.Map(document.getElementById("mappane"),
             mapOptions);
 	google.maps.event.addListener(map, "dblclick", function (e) { 
-        	speaker = {"id" : "BLAH2", "x" : e.latLng.lat().toFixed(6), "y" : e.latLng.lng(), "radius" : 40, "volumeUp" : 0, "volumeDown" : 0};
-		speakers.push(speaker);
-		createMarker(speaker);
+		if (viewFires){
+			fire = {"id" : "FIRE2", "x" : e.latLng.lat().toFixed(6), "y" : e.latLng.lng(), "radius" : 40, "needsFed" : 0}
+			fires.push(fire);
+			createFireMarker(fire);
+		}
+		else{
+			speaker = {"id" : "BLAH2", "x" : e.latLng.lat().toFixed(6), "y" : e.latLng.lng(), "radius" : 40, "volumeUp" : 0, "volumeDown" : 0};
+			speakers.push(speaker);
+			createSpeakerMarker(speaker);
+		}
 	}); 
-      }
-initialize();
 
-//get request from server to get speaker data and map image
+	updateData();
 
-speakers.push({"id" : "BLAH0", "x" : 41.8265, "y" : -71.4140, "radius" : 40, "volumeUp" : 100, "volumeDown" : 200});
-speakers.push({"id" : "BLAH1", "x" : 41.8270, "y" : -71.4140, "radius" : 40, "volumeUp" : 0, "volumeDown" : 150});
+	var togglebutton = document.getElementById("toggleView");
+	togglebutton.onclick = function(e){
+		viewFires = !viewFires;
+		resetMarkers();	
+		if (viewFires){
+			togglebutton.innerHTML = "View Speakers";
+			document.getElementById("fireinfopane").style.display = "block";
+			document.getElementById("speakerinfopane").style.display = "none";
+		}
+		else{
+			togglebutton.innerHTML = "View Fires";
+			document.getElementById("fireinfopane").style.display = "none";
+			document.getElementById("speakerinfopane").style.display = "block";
+		}
+	};
 
-for (var i = 0; i < speakers.length; i++){
-	createMarker(speakers[i])
+	socket.on('data', function (data){
+		
+	});
+
+	socket.on('newSpeaker', function (speaker){
+		createSpeakerMarker(speaker);
+	});
 }
 
-function createMarker(speaker, lat, lng){
+initialize();
+
+function resetMarkers(){
+	for (var i = 0; i < markers.length; i++){
+		markers[i].setMap(null);
+	}
+	markers = new Array();
+	if (viewFires){
+		for (var i = 0; i < fires.length; i++){
+			createFireMarker(fires[i])
+		}
+	}
+	else{
+		for (var i = 0; i < speakers.length; i++){
+			createSpeakerMarker(speakers[i])
+		}
+	}
+}
+
+function createSpeakerMarker(speaker){
 	var myLatLng = new google.maps.LatLng(speaker.x, speaker.y);
 	var speakerMarker = new google.maps.Marker({
 		position: myLatLng,
-		map: map
+		map: map,
+		icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
 	});
+	markers.push(speakerMarker);
 
 	//closure to make this work properly
 	(function (_speaker) {
@@ -67,12 +123,73 @@ function createMarker(speaker, lat, lng){
 	})(speaker);
 }
 
-function resetData(){
-	console.log(selectedSpeaker);
-	//send message to server to reset data for the selected speaker.
-	//only remove the amount that the speaker has in the front-end, anything new on the server should remain.
+function createFireMarker(fire){
+	var myLatLng = new google.maps.LatLng(fire.x, fire.y);
+	var fireMarker = new google.maps.Marker({
+		position: myLatLng,
+		map: map,
+		icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+	});
+	markers.push(fireMarker);
+
+	//closure to make this work properly
+	(function (_fire) {
+		google.maps.event.addListener(fireMarker, 'click', function(){
+			var infopane = document.getElementById("fireinfopane");
+			infopane.innerHTML = "<h3>Fire Information for:</h3>"
+			infopane.innerHTML += "<p>ID: " + _fire.id + "</p>";
+			infopane.innerHTML += "<p>NeedsFed: " + _fire.needsFed + "</p>";
+			selectedFire = _fire.id;
+			var button = document.createElement("button");
+			button.innerHTML = "Reset Data";
+			(function (_button) {
+				button.addEventListener('click', function(){
+					resetData();
+				});
+			})(button);
+			infopane.appendChild(button);
+		});
+		google.maps.event.addListener(fireMarker, 'rightclick', function(){
+			if (confirm("Are you sure you want to delete this speaker?")){
+				fireMarker.setMap(null)
+			}
+		});
+	})(fire);
 }
 
+function resetData(){
+	if (viewFires){
+		socket.emit('resetFireData', null);
+	}
+	else{
+		socket.emit('resetSpeakerData', null);
+	}
+	updateData()
+}
+
+function clearFeedback(){
+	//sends a message to the server to clear the feedback for this speaker
+	updateData();
+}
+
+function updateData(){
+	//pull the most recent feedback data from the server
+	//update the information for each speaker
+	socket.emit('updateTechData');
+}
+
+/*
+function findSpeaker(id){
+	for (var i = 0; i < speakers.length; i++){
+		if (speakers[i].id === id){
+			return speakers[i];
+		}
+	}
+	return null;
+}
+*/
+
+/*
 function getColorFromFeedback(amount){
 	//need to decrease, meaning negative amount
 	var red = parseInt(-Math.min(Math.max(amount, -decreaseCutoff), 0)*(255.0 - minColor)/decreaseCutoff) + minColor;
@@ -108,23 +225,5 @@ function getColorFromFeedback(amount){
 		
 	return "#" + redString + greenString + blueString;
 }
-
-function clearFeedback(){
-	//sends a message to the server to clear the feedback for this speaker
-	updateData();
-}
-
-function updateData(){
-	//pull the most recent feedback data from the server
-	//update the information for each speaker
-}
-
-function findSpeaker(id){
-	for (var i = 0; i < speakers.length; i++){
-		if (speakers[i].id === id){
-			return speakers[i];
-		}
-	}
-	return null;
-}
+*/
 })();

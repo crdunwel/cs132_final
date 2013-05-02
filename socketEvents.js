@@ -28,6 +28,40 @@ module.exports = function(io)
     // bind events to socket
     io.sockets.on('connection', function (client)
     {
+	//tech socket events
+	client.on('updateTechData', function (){
+		console.log("updatedData");
+		//get the data from the database, send it back to the client
+		client.emit('data', null);
+        });
+
+	client.on('resetSpeakerData', function(speaker){
+		console.log("resetSpeakerData");
+		//reset data for the speaker, send back everything
+		client.emit('data', null);
+	});
+
+	client.on('resetFireData', function(fire){
+		console.log("resetFireData");
+		//reset data for the fire, send back everything
+		client.emit('data', null);
+	});
+
+	client.on('newSpeaker', function(speaker){
+		console.log("newSpeaker");
+		console.log(speaker);
+		//add a new speaker to the database
+		client.emit('data', null);
+	});
+
+	client.on('newFire', function(fire){
+		console.log("newFire");
+		console.log(fire);
+		//add a new fire to the database
+		client.emit('data', null);
+	});
+
+
         // Event to run user first connects
         client.on('connected', function (name, fn)
         {
