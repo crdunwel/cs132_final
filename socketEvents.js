@@ -1,6 +1,10 @@
 var cookie = require('cookie');
 var connect = require('connect');
-//var models = require('./models.js');
+var models = require('./models.js');
+
+//used to count number of updates for volume and fire, only update every 5 updates.
+var firecount = 0;
+var volumecount = 0;
 
 module.exports = function(io)
 {
@@ -126,29 +130,29 @@ module.exports = function(io)
             // TODO need to first check if user with session ID already exists
             models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
             {
-		io.sockets.in("techClients").emit("sendMobileData", JSON.stringify({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}));
-
 		models.Fire.findAll().success(function(fires){
-			var closest = 0.005;
+			var closest = 0.001;
 			var closestFire = null;
 
 			for (var i = 0; i < fires.length; i++){
 				var fire = fires[i];
 				var dist = Math.sqrt((location.latitude - fire.latitude)*(location.latitude - fire.latitude) + (location.longitude - fire.longitude)*(location.longitude - fire.longitude));
-				console.log(dist);
 				if (dist < closest){
 					closest = dist;
 					closestFire = fire;
 				}
 			}
 			if (closestFire){
-				console.log(closestFire);
 				models.Fire.find(closestFire.id).success(function(f) {
 					var feds = f.needsFed;
 					f.updateAttributes({
 					  needsFed: feds + 1
 					}).success(function() {
-						sendDataToAllTechs();
+						firecount++;
+						if (firecount > 4){
+							sendDataToAllTechs();
+							firecount = 0;
+						}
 						models.FeedFire.create({feed:true,LocationId:location.id}).success(function(feedFire){
 							fn(true);
 						});
@@ -162,16 +166,51 @@ module.exports = function(io)
         // Event to run when volume slider is slid and stays still for certain number of seconds
         client.on('volume', function (msg, fn)
         {
-            var obj = JSON.parse(msg);
+	    var obj = JSON.parse(msg);
             console.log(obj);
 
             // TODO need to first check if user with session ID already exists
             models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
             {
-                models.Volume.create({dir:obj.dir, LocationId:location.id}).success(function(volume)
-                {
-                    fn(true);
-                });
+		models.Speaker.findAll().success(function(speakers){
+			var closest = 0.001;
+			var closestSpeaker = null;
+
+			for (var i = 0; i < speakers.length; i++){
+				var speaker = speakers[i];
+				var dist = Math.sqrt((location.latitude - speaker.latitude)*(location.latitude - speaker.latitude) + (location.longitude - speaker.longitude)*(location.longitude - speaker.longitude));
+				if (dist < closest){
+					closest = dist;
+					closestSpeaker = speaker;
+				}
+			}
+			if (closestSpeaker){
+				models.Speaker.find(closestSpeaker.id).success(function(f) {
+					var up = f.volumeUp;
+					var down = f.volumeDown;
+					if (obj.dir > 0){
+						up = up + 1;
+					}
+					if (obj.dir < 0){
+						down = down + 1;
+					}
+					f.updateAttributes({
+					  volumeUp: up,
+					  volumeDown: down
+					}).success(function() {
+						volumecount++;
+						if (volumecount > 4){
+							sendDataToAllTechs();
+							volumecount = 0;
+						}
+						models.Volume.create({dir:obj.dir, LocationId:location.id}).success(function(volume)
+						{
+						    fn(true);
+						});
+					  });
+				    });
+			}
+		});
             });
 
         });
