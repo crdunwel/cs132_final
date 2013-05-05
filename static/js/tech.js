@@ -208,5 +208,29 @@ function updateData(){
 	socket.emit('updateTechData');
 }
 
+socket.on('sendMobileData', function(data)
+{
+    var obj = JSON.parse(data);
+    console.log(data);
+    var shortest_dist = Number.POSITIVE_INFINITY;
+    var shortest_node = -1;
+    for (var item in markers)
+    {
+        var lat = markers[item].position.lat();
+        var lng = markers[item].position.lng();
+        var lat_diff = lat - obj.latitude;
+        var lng_diff = lng - obj.longitude;
+        var dist = Math.sqrt(lat_diff*lat_diff + lng_diff*lng_diff);
+        if (dist < shortest_dist)
+        {
+            shortest_dist = dist;
+            shortest_node = item;
+        }
+    }
+    // creates marker on map where location of sender is
+    createFireMarker({"id":2343,"needsFed":50,"latitude":obj.latitude,"longitude":obj.longitude});
+    //markers[shortest_node].fire.needsFed += 1;
+});
+
 
 })();
