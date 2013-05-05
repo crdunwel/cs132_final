@@ -1,6 +1,6 @@
 var cookie = require('cookie');
 var connect = require('connect');
-//var models = require('./models.js');
+var models = require('./models.js');
 
 module.exports = function(io)
 {
