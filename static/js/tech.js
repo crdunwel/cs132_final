@@ -53,7 +53,7 @@ function initialize() {
 	var thresholdButton = document.getElementById("changeThreshold");
 	thresholdButton.onclick = function(e){
 		if(viewFires){
-			var possibleThreshold = prompt("Choose a new fire threshold");
+			var possibleThreshold = prompt("Current Threshold: " + fireThreshold + "\n" +"Choose a new fire threshold");
 			var intRegex = /^\d+$/;
 			if(intRegex.test(possibleThreshold)){
 				socket.emit('updateFireThreshold', possibleThreshold);
@@ -62,7 +62,7 @@ function initialize() {
 					alert("Fire threshold not set. Threshold must be a non-negative integer");
 			}
 		}else{
-			var possibleThreshold = prompt("Choose a new voume threshold");
+			var possibleThreshold = prompt("Current Threshold: " + speakerThreshold + "\n" + "Enter a new volume threshold");
 			var intRegex = /^\d+$/;
 			if(intRegex.test(possibleThreshold)){
 				socket.emit('updateSpeakerThreshold', possibleThreshold);
@@ -145,7 +145,7 @@ function resetMarkers(){
     	{
 		markers[i].setMap(null);
 	}
-	markers = new Array();
+	markers = [];
 }
 
 function createSpeakerMarker(speaker){
@@ -165,7 +165,7 @@ function createSpeakerMarker(speaker){
 	(function (_speaker) {
 		google.maps.event.addListener(speakerMarker, 'click', function(){
 			var infopane = document.getElementById("speakerinfopane");
-			infopane.innerHTML = "<h3>Speaker Information for:</h3>"
+			infopane.innerHTML = "<h3>Speaker Information for:</h3>";
 			infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
 			infopane.innerHTML += "<p>Volume Up Requests: " + _speaker.volumeUp + "</p>";
 			infopane.innerHTML += "<p>Volume Down Requests: " + _speaker.volumeDown + "</p>";
