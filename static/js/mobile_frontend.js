@@ -3,6 +3,7 @@ $(document).ready(function()
     // connect socket to server
     var socket = io.connect('http://localhost:8080');
 
+    // event to run when connected
     socket.on('connect', function ()
     {
         socket.emit('connected', '', function (data)

@@ -4,7 +4,6 @@ var models = require('./models.js');
 
 module.exports = function(io)
 {
-
     // Authorize web socket from session id
     io.set('authorization', function (handshakeData, accept)
     {
@@ -29,64 +28,72 @@ module.exports = function(io)
     // bind events to socket
     io.sockets.on('connection', function (client)
     {
-	function sendData(tech){
-		var speakers;
-		var fires;
-		models.Speaker.findAll().success(function(s) {
-			speakers = s;
-			models.Fire.findAll().success(function(f) {
-				fires = f;
-				var data = {'speakers' : speakers, 'fires' : fires};
-				tech.emit('data', data);
-			});
-		});
-	}
-	
-	//tech socket events
-	client.on('updateTechData', function (){
-		sendData(client);
+
+        function sendData(tech)
+        {
+            var speakers;
+            var fires;
+            models.Speaker.findAll().success(function(s) {
+                speakers = s;
+                models.Fire.findAll().success(function(f) {
+                    fires = f;
+                    var data = {'speakers' : speakers, 'fires' : fires};
+                    tech.emit('data', data);
+                });
+            });
+        }
+
+        client.on("techConnect", function()
+        {
+            client.join("techClients");
         });
 
-	client.on('resetSpeakerData', function(speaker){
-		models.Speaker.find(speaker.id).success(function(s) {
-		    s.updateAttributes({
-		      volumeUp: 0,
-		      volumeDown: 0
-		    }).success(function() {
-			 sendData(client)
-		       });
-		})
-	});
+        //tech socket events
+        client.on('updateTechData', function ()
+        {
+            sendData(client);
+        });
 
-	client.on('resetFireData', function(fire){
-		models.Fire.find(fire.id).success(function(f) {
-		    f.updateAttributes({
-		      needsFed: 0
-		    }).success(function() {
-			sendData(client)
-		       });
-		})
-	});
+        client.on('resetSpeakerData', function(speaker){
+            models.Speaker.find(speaker.id).success(function(s) {
+                s.updateAttributes({
+                  volumeUp: 0,
+                  volumeDown: 0
+                }).success(function() {
+                 sendData(client)
+                   });
+            })
+        });
 
-	client.on('newSpeaker', function(lat, lng){
-		models.Speaker.create({"latitude" : lat, "longitude" : lng, "volumeUp" : 100, "volumeDown" : 0}).success(function(){
-			sendData(client);
-		});
-	});
+        client.on('resetFireData', function(fire){
+            models.Fire.find(fire.id).success(function(f) {
+                f.updateAttributes({
+                  needsFed: 0
+                }).success(function() {
+                sendData(client)
+                   });
+            })
+        });
 
-	client.on('newFire', function(lat, lng){
-		models.Fire.create({"latitude" : lat, "longitude" : lng, "needsFed" : 50}).success(function(){
-			sendData(client);
-		});
-	});
+        client.on('newSpeaker', function(lat, lng){
+            models.Speaker.create({"latitude" : lat, "longitude" : lng, "volumeUp" : 100, "volumeDown" : 0}).success(function(){
+                sendData(client);
+            });
+        });
 
-	client.on('removeSpeaker', function(speaker){
-		models.Speaker.find(speaker.id).success(function(s){if (s) {s.destroy(); sendData(client);}});
-	});
+        client.on('newFire', function(lat, lng){
+            models.Fire.create({"latitude" : lat, "longitude" : lng, "needsFed" : 50}).success(function(){
+                sendData(client);
+            });
+        });
 
-	client.on('removeFire', function(fire){
-		models.Fire.find(fire.id).success(function(f){if (f) {f.destroy(); sendData(client);}});
-	});
+        client.on('removeSpeaker', function(speaker){
+            models.Speaker.find(speaker.id).success(function(s){if (s) {s.destroy(); sendData(client);}});
+        });
+
+        client.on('removeFire', function(fire){
+            models.Fire.find(fire.id).success(function(f){if (f) {f.destroy(); sendData(client);}});
+        });
 
 
         // Event to run user first connects
@@ -107,10 +114,10 @@ module.exports = function(io)
             {
                 models.FeedFire.create({feed:true,LocationId:location.id}).success(function(feedFire)
                 {
+                    io.sockets.in('techClients').emit('sendMobileData',JSON.stringify({type:"feed",longitude:obj.coords.longitude,latitude:obj.coords.latitude}));
                     fn(true);
                 });
             });
-
         });
 
         // Event to run when volume slider is slid and stays still for certain number of seconds
