@@ -32,7 +32,8 @@ module.exports = function(io)
     // bind events to socket
     io.sockets.on('connection', function (client)
     {
-
+	
+	//send all speaker and fire data to a tech client
         function sendData(tech)
         {
             var speakers;
@@ -47,6 +48,7 @@ module.exports = function(io)
             });
         }
 
+	//send all speaker and fire data to all the tech clients
 	function sendDataToAllTechs()
         {
             var speakers;
@@ -61,17 +63,20 @@ module.exports = function(io)
             });
         }
 
+	//emitted by the tech client upon connection
         client.on("techConnect", function()
         {
             client.join("techClients");
         });
 
         //tech socket events
+
         client.on('updateTechData', function ()
         {
             sendData(client);
         });
-
+	
+	//set speaker data to zero
         client.on('resetSpeakerData', function(speaker){
             models.Speaker.find(speaker.id).success(function(s) {
                 s.updateAttributes({
@@ -83,6 +88,7 @@ module.exports = function(io)
             })
         });
 
+	//set fire data to zero
         client.on('resetFireData', function(fire){
             models.Fire.find(fire.id).success(function(f) {
                 f.updateAttributes({
@@ -93,18 +99,21 @@ module.exports = function(io)
             })
         });
 
+	//add a new speaker to the database
         client.on('newSpeaker', function(lat, lng){
             models.Speaker.create({"latitude" : lat, "longitude" : lng, "volumeUp" : 100, "volumeDown" : 0}).success(function(){
                 sendData(client);
             });
         });
 
+	//add a new fire to the database
         client.on('newFire', function(lat, lng){
             models.Fire.create({"latitude" : lat, "longitude" : lng, "needsFed" : 50}).success(function(){
                 sendData(client);
             });
         });
 
+	//remove things from the database
         client.on('removeSpeaker', function(speaker){
             models.Speaker.find(speaker.id).success(function(s){if (s) {s.destroy(); sendData(client);}});
         });
@@ -144,6 +153,7 @@ module.exports = function(io)
 				}
 			}
 			if (closestFire){
+				//add 1 to the feed requests for the closest fire
 				models.Fire.find(closestFire.id).success(function(f) {
 					var feds = f.needsFed;
 					f.updateAttributes({
@@ -187,6 +197,7 @@ module.exports = function(io)
 				}
 			}
 			if (closestSpeaker){
+				//modifies the volume requests for the closest speaker
 				models.Speaker.find(closestSpeaker.id).success(function(f) {
 					var up = f.volumeUp;
 					var down = f.volumeDown;
