@@ -1,7 +1,11 @@
+//entire code is in closure to make it run right away
 (function(){
+//array of markers so they can be managed
 var markers = new Array();
 var map;
+//boolean determining the view
 var viewFires = true;
+var selected = -1;
 var socket = io.connect();
 var fireThreshold;
 var speakerThreshold;
@@ -9,9 +13,11 @@ socket.emit("techConnect");
 
 function initialize() {
         var mapOptions = {
+	//these are approximate coordinates for waterfire
           center: new google.maps.LatLng(41.8265, -71.4140),
           zoom: 18,
           mapTypeId: google.maps.MapTypeId.HYBRID,
+	//want double click to add things
 	  disableDoubleClickZoom: true,
 	  streetViewControl: false
         };
@@ -28,15 +34,11 @@ function initialize() {
 
 	updateData();
 
-	//var firesdata = JSON.parse(firesJSON);
-	//for (var i = 0; i < firesdata.length; i++){
-	//	socket.emit('newFire', firesdata[i].latitude, firesdata[i].longitude);
-	//}
-
 	var togglebutton = document.getElementById("toggleView");
 	togglebutton.onclick = function(e){
 		viewFires = !viewFires;
 		updateData();
+		//hide the appropriate pane
 		if (viewFires){
 			togglebutton.innerHTML = "View Speakers";
 			document.getElementById("fireinfopane").style.display = "block";
@@ -70,21 +72,61 @@ function initialize() {
 			}
 		}
 	}
-	socket.on('data', function (data)
-    {
+
+
+	//receiving data from server
+	//clear markers and recreate them
+	socket.on('data', function (data){
+
 		resetMarkers();
-		if (viewFires)
-        {
-			for (var i = 0; i < data.fires.length; i++)
-            {
+		if (viewFires){
+			var selectedFire = null;
+			for (var i = 0; i < data.fires.length; i++){
 				createFireMarker(data.fires[i]);
+				if (selected === data.fires[i].id){
+					selectedFire = data.fires[i];
+				}
+			}
+			//update the selected fire's displayed info without having to click it
+			if (selectedFire){
+				var infopane = document.getElementById("fireinfopane");
+				infopane.innerHTML = "<h3>Fire Information for:</h3>";
+				infopane.innerHTML += "<p>ID: " + selectedFire.id + "</p>";
+				infopane.innerHTML += "<p>Feed Requests: " + selectedFire.needsFed + "</p>";
+				var button = document.createElement("button");
+				button.innerHTML = "Reset Data";
+				(function (_button) {
+					button.addEventListener('click', function(){
+						socket.emit('resetFireData', selectedFire);
+					});
+				})(button);
+				infopane.appendChild(button);
 			}
 		}
-		else
-        {
-			for (var i = 0; i < data.speakers.length; i++)
-            {
+		else{
+			var selectedSpeaker = null;
+			for (var i = 0; i < data.speakers.length; i++){
 				createSpeakerMarker(data.speakers[i]);
+				if (selected === data.speakers[i].id){
+					selectedSpeaker = data.speakers[i];
+				}
+			}
+			//update the selected speaker's displayed info without having to click it
+			if (selectedSpeaker){
+				var infopane = document.getElementById("speakerinfopane");
+				infopane.innerHTML = "<h3>Speaker Information for:</h3>"
+				infopane.innerHTML += "<p>ID: " + selectedSpeaker.id + "</p>";
+				infopane.innerHTML += "<p>Volume Up Requests: " + selectedSpeaker.volumeUp + "</p>";
+				infopane.innerHTML += "<p>Volume Down Requests: " + selectedSpeaker.volumeDown + "</p>";
+				infopane.innerHTML += "<p>Net Requests: " + (selectedSpeaker.volumeUp - selectedSpeaker.volumeDown) + "</p>";
+				var button = document.createElement("button");
+				button.innerHTML = "Reset Data";
+				(function (_button) {
+					button.addEventListener('click', function(){
+						socket.emit('resetSpeakerData', selectedSpeaker);
+					});
+				})(button);
+				infopane.appendChild(button);
 			}
 		}
 	});
@@ -97,9 +139,10 @@ function initialize() {
 
 initialize();
 
+//clear the markers by setting their maps to null
 function resetMarkers(){
 	for (var i = 0; i < markers.length; i++)
-    {
+    	{
 		markers[i].setMap(null);
 	}
 	markers = new Array();
@@ -124,11 +167,10 @@ function createSpeakerMarker(speaker){
 			var infopane = document.getElementById("speakerinfopane");
 			infopane.innerHTML = "<h3>Speaker Information for:</h3>"
 			infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
-			infopane.innerHTML += "<p>Volume Up: " + _speaker.volumeUp + "</p>";
-			infopane.innerHTML += "<p>Volume Down: " + _speaker.volumeDown + "</p>";
-			infopane.innerHTML += "<p>Net: " + (_speaker.volumeUp - _speaker.volumeDown) + "</p>";
-			infopane.innerHTML += "<p>Radius: " + _speaker.radius + "</p>";
-			selectedSpeaker = _speaker.id;
+			infopane.innerHTML += "<p>Volume Up Requests: " + _speaker.volumeUp + "</p>";
+			infopane.innerHTML += "<p>Volume Down Requests: " + _speaker.volumeDown + "</p>";
+			infopane.innerHTML += "<p>Net Requests: " + (_speaker.volumeUp - _speaker.volumeDown) + "</p>";
+			selected = _speaker.id;
 			var button = document.createElement("button");
 			button.innerHTML = "Reset Data";
 			(function (_button) {
@@ -167,8 +209,8 @@ function createFireMarker(fire){
 			var infopane = document.getElementById("fireinfopane");
 			infopane.innerHTML = "<h3>Fire Information for:</h3>";
 			infopane.innerHTML += "<p>ID: " + _fire.id + "</p>";
-			infopane.innerHTML += "<p>NeedsFed: " + _fire.needsFed + "</p>";
-			selectedFire = _fire.id;
+			infopane.innerHTML += "<p>Feed Requests: " + _fire.needsFed + "</p>";
+			selected = _fire.id;
 			var button = document.createElement("button");
 			button.innerHTML = "Reset Data";
 			(function (_button) {
@@ -186,41 +228,16 @@ function createFireMarker(fire){
 	})(fire);
 }
 
-function resetData(){
-	if (viewFires){
-		socket.emit('resetFireData', null);
-	}
-	else{
-		socket.emit('resetSpeakerData', null);
-	}
-	updateData()
-}
-
 function updateData(){
 	//pull the most recent feedback data from the server
 	//update the information for each speaker
 	socket.emit('updateTechData');
 }
 
+//debug code to display the location of a user when they send a request
 socket.on('sendMobileData', function(data)
 {
     var obj = JSON.parse(data);
-    console.log(data);
-    var shortest_dist = Number.POSITIVE_INFINITY;
-    var shortest_node = -1;
-    for (var item in markers)
-    {
-        var lat = markers[item].position.lat();
-        var lng = markers[item].position.lng();
-        var lat_diff = lat - obj.latitude;
-        var lng_diff = lng - obj.longitude;
-        var dist = Math.sqrt(lat_diff*lat_diff + lng_diff*lng_diff);
-        if (dist < shortest_dist)
-        {
-            shortest_dist = dist;
-            shortest_node = item;
-        }
-    }
     // creates marker on map where location of sender is
     createFireMarker({"id":2343,"needsFed":50,"latitude":obj.latitude,"longitude":obj.longitude});
     //markers[shortest_node].fire.needsFed += 1;
