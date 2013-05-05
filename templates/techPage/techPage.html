@@ -1,39 +1,35 @@
 <!DOCTYPE html>
 <html>
-<head>
-<link href="/static/css/tech.css" rel="stylesheet" type="text/css">
-<title>
-Technician control
-</title>
-<script type ="text/javascript"
-	src="https://maps.googleapis.com/maps/api/js?sensor=false">
-</script>
-<script src="/socket.io/socket.io.js"></script>
-</head>
+    <head>
+        <link href="/static/css/tech.css" rel="stylesheet" type="text/css">
+        <title>Technician control</title>
+        <script type ="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
 
-<body>
-	<h1>Technician Control</h1>
+    <body>
+        <h1>Technician Control</h1>
 
-	<div id = "mappane">
-		<div id="map" style="position:relative;">
-		</div>
-	</div>
-	<div id="infopane">
-		<button type="button" id="toggleView">View Speakers</button>
-		<button type="button" id="changeThreshold">Change Thresholds</button>
-		<div id="speakerinfopane">
-			
-		</div>
-		<div id="fireinfopane">
-			
-		</div>
-	</div>
-	<div id ="howto">
-		<h2> Click on a marker to get info on the speaker or fire it represents</h2>
-		<h2> Double click to add a new speaker/fire. Right click to remove.</h2>
-		<h2> Switch between speakers and fires using the button above the info panel</h2>
-		<h2> To change the number of votes necessary before a marker changes color use the Change Thresholds button</h2>
-	</div>
-	<script type="text/javascript" src="/static/js/tech.js"></script>
-</body>
+        <div id = "mappane">
+            <div id="map" style="position:relative;">
+            </div>
+        </div>
+        <div id="infopane">
+            <button type="button" id="toggleView">View Speakers</button>
+            <button type="button" id="changeThreshold">Change Thresholds</button>
+            <div id="speakerinfopane">
+
+            </div>
+            <div id="fireinfopane">
+
+            </div>
+        </div>
+        <div id ="howto">
+            <h2> Click on a marker to get info on the speaker or fire it represents</h2>
+            <h2> Double click to add a new speaker/fire. Right click to remove.</h2>
+            <h2> Switch between speakers and fires using the button above the info panel</h2>
+            <h2> To change the number of votes necessary before a marker changes color use the Change Thresholds button</h2>
+        </div>
+        <script type="text/javascript" src="/static/js/tech.js"></script>
+    </body>
 </html>
