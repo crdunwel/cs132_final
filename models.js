@@ -42,7 +42,31 @@ var Volume = sequelize.define('Volume',
         timestamps: false
     }).belongsTo(Location);
 
+var Speaker = sequelize.define('Speaker',
+    {
+        id: { type: Sequelize.INTEGER, autoIncrement: true },
+        volumeUp: Sequelize.INTEGER,
+	volumeDown: Sequelize.INTEGER,
+	latitude: Sequelize.FLOAT,
+        longitude: Sequelize.FLOAT
+    },
+    {
+        timestamps: false
+    });
+var Fire = sequelize.define('Fire',
+    {
+        id: { type: Sequelize.INTEGER, autoIncrement: true },
+        needsFed: Sequelize.INTEGER,
+	latitude: Sequelize.FLOAT,
+        longitude: Sequelize.FLOAT
+    },
+    {
+        timestamps: false
+    });
+	
 sequelize.sync({force: true});
 exports.Location = Location;
 exports.FeedFire = FeedFire;
 exports.Volume = Volume;
+exports.Speaker = Speaker;
+exports.Fire = Fire;

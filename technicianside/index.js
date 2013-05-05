@@ -5,36 +5,43 @@ var minColor = 30;
 var speakerRadius = 10;
 var selectedSpeaker = -1;
 var speakers = new Array();
+var map;
+function initialize() {
+        var mapOptions = {
+          center: new google.maps.LatLng(41.8265, -71.4140),
+          zoom: 18,
+          mapTypeId: google.maps.MapTypeId.HYBRID,
+	  disableDoubleClickZoom: true
+        };
+        map = new google.maps.Map(document.getElementById("mappane"),
+            mapOptions);
+	google.maps.event.addListener(map, "dblclick", function (e) { 
+        	speaker = {"id" : "BLAH2", "x" : e.latLng.lat().toFixed(6), "y" : e.latLng.lng(), "radius" : 40, "volumeUp" : 0, "volumeDown" : 0};
+		speakers.push(speaker);
+		createMarker(speaker);
+	}); 
+      }
+initialize();
 
 //get request from server to get speaker data and map image
 
-speakers.push({"id" : "BLAH0", "x" : 120, "y" : 170, "radius" : 40, "volumeUp" : 100, "volumeDown" : 200});
-speakers.push({"id" : "BLAH1", "x" : 120, "y" : 250, "radius" : 40, "volumeUp" : 0, "volumeDown" : 150});
-speakers.push({"id" : "BLAH2", "x" : 190, "y" : 240, "radius" : 40, "volumeUp" : 1000, "volumeDown" : 1100});
-speakers.push({"id" : "BLAH3", "x" : 280, "y" : 200, "radius" : 40, "volumeUp" : 100, "volumeDown" : 150});
-speakers.push({"id" : "BLAH4", "x" : 400, "y" : 200, "radius" : 40, "volumeUp" : 300, "volumeDown" : 100});
-speakers.push({"id" : "BLAH5", "x" : 670, "y" : 390, "radius" : 40, "volumeUp" : 100, "volumeDown" : 100});
-speakers.push({"id" : "BLAH6", "x" : 680, "y" : 420, "radius" : 40, "volumeUp" : 100, "volumeDown" : 200});
-speakers.push({"id" : "BLAH7", "x" : 695, "y" : 450, "radius" : 40, "volumeUp" : 100, "volumeDown" : 300});
-speakers.push({"id" : "BLAH8", "x" : 710, "y" : 500, "radius" : 40, "volumeUp" : 100, "volumeDown" : 200});
+speakers.push({"id" : "BLAH0", "x" : 41.8265, "y" : -71.4140, "radius" : 40, "volumeUp" : 100, "volumeDown" : 200});
+speakers.push({"id" : "BLAH1", "x" : 41.8270, "y" : -71.4140, "radius" : 40, "volumeUp" : 0, "volumeDown" : 150});
 
-var map = document.getElementById("map");
-document.getElementById("mappane").style.backgroundImage = "url(map.png)";
 for (var i = 0; i < speakers.length; i++){
-	var speaker = speakers[i];
-	var newspeaker = document.createElement('div');
-	speaker["element"] = newspeaker;
-	newspeaker.id = speaker.id;
-	newspeaker.className = "speaker"
-	newspeaker.style.position = "absolute";
-	newspeaker.style.left = speaker.x + "px";
-	newspeaker.style.top = speaker.y + "px";
-	newspeaker.style.width = speakerRadius*2 + "px";
-	newspeaker.style.height = speakerRadius*2 + "px";
-	newspeaker.style.backgroundColor = getColorFromFeedback(speaker.volumeUp - speaker.volumeDown);
+	createMarker(speakers[i])
+}
+
+function createMarker(speaker, lat, lng){
+	var myLatLng = new google.maps.LatLng(speaker.x, speaker.y);
+	var speakerMarker = new google.maps.Marker({
+		position: myLatLng,
+		map: map
+	});
+
 	//closure to make this work properly
 	(function (_speaker) {
-		_speaker["element"].addEventListener('click', function(){
+		google.maps.event.addListener(speakerMarker, 'click', function(){
 			var infopane = document.getElementById("infopane");
 			infopane.innerHTML = "<h3>Speaker Information for:</h3>"
 			infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
@@ -52,8 +59,12 @@ for (var i = 0; i < speakers.length; i++){
 			})(button);
 			infopane.appendChild(button);
 		});
+		google.maps.event.addListener(speakerMarker, 'rightclick', function(){
+			if (confirm("Are you sure you want to delete this speaker?")){
+				speakerMarker.setMap(null)
+			}
+		});
 	})(speaker);
-	map.appendChild(newspeaker);
 }
 
 function resetData(){

@@ -1,0 +1,46 @@
+html{
+	min-width: 800px;
+}
+
+#mappane{
+	width: 60%;
+	height: 600px;
+	display:inline-block;
+}
+
+#toggleView{
+	width: 150px;
+	height: 30px;
+}
+
+#infopane{
+	margin-left: 10px;
+	position: fixed;
+	width: 39%;
+	height: 600px;
+	display:inline-block;
+	vertical-align: top;
+}
+
+#speakerinfopane{
+	height: 600px;
+	background-color: #BBFFBB;
+	display: none;
+}
+
+#fireinfopane{
+	height: 600px;
+	background-color: #FFBBBB;
+}
+
+#infopane h3{
+	margin: 5px 0px 5px 0px;
+}
+
+#infopane p{
+	margin: 2px 0px 2px 0px;
+}
+
+.speaker{
+	border-radius: 10px;
+}
