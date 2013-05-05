@@ -31,33 +31,54 @@ $(document).ready(function()
             socket.emit('volume', JSON.stringify(position), function(bool)
             {
                 // TODO do something with returned bool value
+                if(true){
+                    playSound('sounds/error.mp3');
+                    alert('success! Your request has been noted');
+                }else{
+                    playSound('sounds/error.mp3');
+                    alert('We were unable to process your request');
+                }
             });
         }
 
         function error(error)
         {
-            // TODO handle case where no GPS present
+            alert("GPS Error, your vote could not be counted")
         }
     }
 
     $feedFireButton.click(function()
     {
         navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
-
+        console.log("CLICKED");
         function success(position)
         {
             socket.emit('feedFire', JSON.stringify(position), function(bool)
             {
                 // TODO do something with returned bool value
+                console.log("FIRE FEEDING");
+                if(true){
+                    playSound('sounds/error.mp3');
+                    alert('success! Your request has been noted');
+                }else{
+                    playSound('sounds/error.mp3');
+                    alert('We were unable to process your request');
+                }
             });
         }
 
         function error(error)
         {
-            // TODO handle GPS error
+            console.log("GPS ERROR");
+            alert("GPS Error, your vote could not be counted")
         }
     });
 
+     function playSound(soundfile) {
+        console.log("MAKING SOUND plzS");
+        document.getElementById("dummy").innerHTML=
+        "<embed src=\""+soundfile+"\" hidden=\"true\" autostart=\"true\" loop=\"false\" />";
+    }
     // OLD SLIDER METHOD
     /*
      var sliderTimeout;    // used for timeout of slider so user isn't sending 100's of request to server.

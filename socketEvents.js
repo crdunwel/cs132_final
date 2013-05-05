@@ -183,7 +183,9 @@ module.exports = function(io)
                             });
                           });
                         });
-			        }
+			        }else{
+                        fn(false);
+                    }
 		        });
             });
         });
