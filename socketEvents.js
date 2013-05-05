@@ -131,6 +131,7 @@ module.exports = function(io)
             models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
             {
 		models.Fire.findAll().success(function(fires){
+			//person must be within this radius
 			var closest = 0.001;
 			var closestFire = null;
 
@@ -173,7 +174,8 @@ module.exports = function(io)
             models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
             {
 		models.Speaker.findAll().success(function(speakers){
-			var closest = 0.001;
+			//person must be within this radius, it's a little larger for volume controls
+			var closest = 0.002;
 			var closestSpeaker = null;
 
 			for (var i = 0; i < speakers.length; i++){
