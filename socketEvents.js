@@ -6,6 +6,9 @@ var models = require('./models.js');
 var firecount = 0;
 var volumecount = 0;
 
+// Number of seconds between user clicks registering as data.  Used to prevent spamming of clicks.
+var reclickTimer = 1;
+
 module.exports = function(io)
 {   
     var fireThreshold= 50;
@@ -148,46 +151,62 @@ module.exports = function(io)
         client.on('feedFire', function (msg, fn)
         {
             var obj = JSON.parse(msg);
-            console.log(obj);
 
-            // TODO need to first check if user with session ID already exists
-            models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
+            if (!client.hasOwnProperty("lastClick"))
             {
-		        models.Fire.findAll().success(function(fires){
-                //person must be within this radius
-                var closest = 0.001;
-                var closestFire = null;
+                client.lastClick = Date.now();
+                diff = reclickTimer;
+            }
+            else
+            {
+                var now = Date.now();
+                var diff = (now - client.lastClick)/1000;
+            }
 
-                for (var i = 0; i < fires.length; i++){
-                    var fire = fires[i];
-                    var dist = Math.sqrt((location.latitude - fire.latitude)*(location.latitude - fire.latitude) + (location.longitude - fire.longitude)*(location.longitude - fire.longitude));
-                    if (dist < closest){
-                        closest = dist;
-                        closestFire = fire;
-                    }
-                }
-                if (closestFire){
-                    //add 1 to the feed requests for the closest fire
-                    models.Fire.find(closestFire.id).success(function(f) {
-                        var feds = f.needsFed;
-                        f.updateAttributes({
-                          needsFed: feds + 1
-                        }).success(function() {
-                            firecount++;
-                            if (firecount > 4){
-                                sendDataToAllTechs();
-                                firecount = 0;
+            if (diff >= reclickTimer)
+            {
+                models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
+                {
+                    models.Fire.findAll().success(function(fires){
+                        //person must be within this radius
+                        var closest = 0.001;
+                        var closestFire = null;
+
+                        for (var i = 0; i < fires.length; i++){
+                            var fire = fires[i];
+                            var dist = Math.sqrt((location.latitude - fire.latitude)*(location.latitude - fire.latitude) + (location.longitude - fire.longitude)*(location.longitude - fire.longitude));
+                            if (dist < closest){
+                                closest = dist;
+                                closestFire = fire;
                             }
-                            models.FeedFire.create({feed:true,LocationId:location.id}).success(function(feedFire){
-                                fn(true);
+                        }
+                        if (closestFire){
+                            //add 1 to the feed requests for the closest fire
+                            models.Fire.find(closestFire.id).success(function(f) {
+                                var feds = f.needsFed;
+                                f.updateAttributes({
+                                    needsFed: feds + 1
+                                }).success(function() {
+                                        firecount++;
+                                        if (firecount > 4){
+                                            sendDataToAllTechs();
+                                            firecount = 0;
+                                        }
+                                        models.FeedFire.create({feed:true,LocationId:location.id}).success(function(feedFire){
+                                            fn(true);
+                                        });
+                                    });
                             });
-                          });
-                        });
-			        }else{
-                        fn(false);
-                    }
-		        });
-            });
+
+                        }else{
+                            fn(false);
+                        }
+                    });
+                });
+            }else{
+                fn(true);
+            }
+
         });
 
         // Event to run when volume slider is slid and stays still for certain number of seconds
@@ -202,7 +221,7 @@ module.exports = function(io)
                 var diff = (now - client.lastClick)/1000;
             }
 
-            if (diff >= 10)
+            if (diff >= reclickTimer)
             {
                 // insert location object into database
                 models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
@@ -250,9 +269,13 @@ module.exports = function(io)
                                         });
                                     });
                             });
+                        }else{
+                            fn(false);
                         }
                     });
                 });
+            }else{
+                fn(true);
             }
         });
     });
