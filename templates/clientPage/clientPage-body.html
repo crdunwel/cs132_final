@@ -1,5 +1,6 @@
 <div id="mobileWrapper">
-    <button id="feedFireButton"><img width=25 src="/static/images/fire_icon.png" style="float:left"/> <span>Feed Fire</span> <img width=25 src="/static/images/fire_icon.png" style="float:right"/></button>
+    <div id="logo"><img width="250" height="50" src="/static/images/logo4.jpg" style="float:left"/> </div>
+    <button id="feedFireButton"><img width="25" src="/static/images/fire_icon.png" style="float:left"/> <span>Feed Fire</span> <img width=25 src="/static/images/fire_icon.png" style="float:right"/></button>
     <br>
 
     <h2>Playing Now</h2>
@@ -10,8 +11,24 @@
         <button>See Playlist</button><button>Buy Song</button>
         <!--<button class="volumeButton" data-json='{"dir":-1}'>&#8595; Playlist</button><button class="volumeButton" data-json='{"dir":1}'>&#8593; Buy Song</button>-->
         <!-- <div id="currVol">Current Volume: 50</div> -->
-        <div id="sliderDiv">
-            <img src="/static/images/dec_volume.png"/><span id="volumeBar"></span><img src="/static/images/inc_volume.png"/>
+        <div id="volume">
+           <button id="down"><img width="40" height="40"src="/static/images/dec_volume.png"/></button>
+           <button id="up"><img width="40" height="40" src="/static/images/inc_volume.png"/></button>
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $('#down')
+    .button()
+    .click(function() {
+        // up clicked
+    })
+    .next()
+    .button()
+    .click(function() {
+        // down clicked
+    })
+    .parent()
+    .buttonset();
+</script>

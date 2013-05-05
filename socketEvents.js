@@ -43,6 +43,20 @@ module.exports = function(io)
             });
         }
 
+	function sendDataToAllTechs()
+        {
+            var speakers;
+            var fires;
+            models.Speaker.findAll().success(function(s) {
+                speakers = s;
+                models.Fire.findAll().success(function(f) {
+                    fires = f;
+                    var data = {'speakers' : speakers, 'fires' : fires};
+                    io.sockets.in("techClients").emit('data', data);
+                });
+            });
+        }
+
         client.on("techConnect", function()
         {
             client.join("techClients");
@@ -112,11 +126,36 @@ module.exports = function(io)
             // TODO need to first check if user with session ID already exists
             models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
             {
-                models.FeedFire.create({feed:true,LocationId:location.id}).success(function(feedFire)
-                {
-                    io.sockets.in('techClients').emit('sendMobileData',JSON.stringify({type:"feed",longitude:obj.coords.longitude,latitude:obj.coords.latitude}));
-                    fn(true);
-                });
+		io.sockets.in("techClients").emit("sendMobileData", JSON.stringify({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}));
+
+		models.Fire.findAll().success(function(fires){
+			var closest = 0.005;
+			var closestFire = null;
+
+			for (var i = 0; i < fires.length; i++){
+				var fire = fires[i];
+				var dist = Math.sqrt((location.latitude - fire.latitude)*(location.latitude - fire.latitude) + (location.longitude - fire.longitude)*(location.longitude - fire.longitude));
+				console.log(dist);
+				if (dist < closest){
+					closest = dist;
+					closestFire = fire;
+				}
+			}
+			if (closestFire){
+				console.log(closestFire);
+				models.Fire.find(closestFire.id).success(function(f) {
+					var feds = f.needsFed;
+					f.updateAttributes({
+					  needsFed: feds + 1
+					}).success(function() {
+						sendDataToAllTechs();
+						models.FeedFire.create({feed:true,LocationId:location.id}).success(function(feedFire){
+							fn(true);
+						});
+					  });
+				    });
+			}
+		});
             });
         });
 
