@@ -2,6 +2,7 @@
 var markers = new Array();
 var map;
 var viewFires = true;
+var selected = -1;
 var socket = io.connect();
 
 socket.emit("techConnect");
@@ -48,21 +49,54 @@ function initialize() {
 		}
 	};
 
-	socket.on('data', function (data)
-    {
+	socket.on('data', function (data){
 		resetMarkers();
-		if (viewFires)
-        {
-			for (var i = 0; i < data.fires.length; i++)
-            {
+		if (viewFires){
+			var selectedFire = null;
+			for (var i = 0; i < data.fires.length; i++){
 				createFireMarker(data.fires[i]);
+				if (selected === data.fires[i].id){
+					selectedFire = data.fires[i];
+				}
+			}
+			if (selectedFire){
+				var infopane = document.getElementById("fireinfopane");
+				infopane.innerHTML = "<h3>Fire Information for:</h3>";
+				infopane.innerHTML += "<p>ID: " + selectedFire.id + "</p>";
+				infopane.innerHTML += "<p>Feed Requests: " + selectedFire.needsFed + "</p>";
+				var button = document.createElement("button");
+				button.innerHTML = "Reset Data";
+				(function (_button) {
+					button.addEventListener('click', function(){
+						socket.emit('resetFireData', selectedFire);
+					});
+				})(button);
+				infopane.appendChild(button);
 			}
 		}
-		else
-        {
-			for (var i = 0; i < data.speakers.length; i++)
-            {
+		else{
+			var selectedSpeaker = null;
+			for (var i = 0; i < data.speakers.length; i++){
 				createSpeakerMarker(data.speakers[i]);
+				if (selected === data.speakers[i].id){
+					selectedSpeaker = data.speakers[i];
+				}
+			}
+			if (selectedSpeaker){
+				var infopane = document.getElementById("speakerinfopane");
+				infopane.innerHTML = "<h3>Speaker Information for:</h3>"
+				infopane.innerHTML += "<p>ID: " + selectedSpeaker.id + "</p>";
+				infopane.innerHTML += "<p>Volume Up Requests: " + selectedSpeaker.volumeUp + "</p>";
+				infopane.innerHTML += "<p>Volume Down Requests: " + selectedSpeaker.volumeDown + "</p>";
+				infopane.innerHTML += "<p>Net Requests: " + (selectedSpeaker.volumeUp - selectedSpeaker.volumeDown) + "</p>";
+				var button = document.createElement("button");
+				button.innerHTML = "Reset Data";
+				(function (_button) {
+					button.addEventListener('click', function(){
+						socket.emit('resetSpeakerData', selectedSpeaker);
+					});
+				})(button);
+				infopane.appendChild(button);
 			}
 		}
 	});
@@ -72,7 +106,7 @@ initialize();
 
 function resetMarkers(){
 	for (var i = 0; i < markers.length; i++)
-    {
+    	{
 		markers[i].setMap(null);
 	}
 	markers = new Array();
@@ -97,11 +131,10 @@ function createSpeakerMarker(speaker){
 			var infopane = document.getElementById("speakerinfopane");
 			infopane.innerHTML = "<h3>Speaker Information for:</h3>"
 			infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
-			infopane.innerHTML += "<p>Volume Up: " + _speaker.volumeUp + "</p>";
-			infopane.innerHTML += "<p>Volume Down: " + _speaker.volumeDown + "</p>";
-			infopane.innerHTML += "<p>Net: " + (_speaker.volumeUp - _speaker.volumeDown) + "</p>";
-			infopane.innerHTML += "<p>Radius: " + _speaker.radius + "</p>";
-			selectedSpeaker = _speaker.id;
+			infopane.innerHTML += "<p>Volume Up Requests: " + _speaker.volumeUp + "</p>";
+			infopane.innerHTML += "<p>Volume Down Requests: " + _speaker.volumeDown + "</p>";
+			infopane.innerHTML += "<p>Net Requests: " + (_speaker.volumeUp - _speaker.volumeDown) + "</p>";
+			selected = _speaker.id;
 			var button = document.createElement("button");
 			button.innerHTML = "Reset Data";
 			(function (_button) {
@@ -140,8 +173,8 @@ function createFireMarker(fire){
 			var infopane = document.getElementById("fireinfopane");
 			infopane.innerHTML = "<h3>Fire Information for:</h3>";
 			infopane.innerHTML += "<p>ID: " + _fire.id + "</p>";
-			infopane.innerHTML += "<p>NeedsFed: " + _fire.needsFed + "</p>";
-			selectedFire = _fire.id;
+			infopane.innerHTML += "<p>Feed Requests: " + _fire.needsFed + "</p>";
+			selected = _fire.id;
 			var button = document.createElement("button");
 			button.innerHTML = "Reset Data";
 			(function (_button) {
@@ -174,30 +207,6 @@ function updateData(){
 	//update the information for each speaker
 	socket.emit('updateTechData');
 }
-
-socket.on('sendMobileData', function(data)
-{
-    var obj = JSON.parse(data);
-    console.log(data);
-    var shortest_dist = Number.POSITIVE_INFINITY;
-    var shortest_node = -1;
-    for (var item in markers)
-    {
-        var lat = markers[item].position.lat();
-        var lng = markers[item].position.lng();
-        var lat_diff = lat - obj.latitude;
-        var lng_diff = lng - obj.longitude;
-        var dist = Math.sqrt(lat_diff*lat_diff + lng_diff*lng_diff);
-        if (dist < shortest_dist)
-        {
-            shortest_dist = dist;
-            shortest_node = item;
-        }
-    }
-    // creates marker on map where location of sender is
-    createFireMarker({"id":2343,"needsFed":50,"latitude":obj.latitude,"longitude":obj.longitude});
-    //markers[shortest_node].fire.needsFed += 1;
-});
 
 
 })();
