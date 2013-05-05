@@ -1,5 +1,9 @@
 <div id="mobileWrapper">
-    <div id="logo"><img width="250" height="50" src="/static/images/logo4.jpg" style="float:left"/> </div>
+
+    <div id="logo">
+        <img width="250" height="50" src='/static/images/logo4.jpg' style="float:left" />
+    </div>
+
     <button id="feedFireButton"><img width="25" src="/static/images/fire_icon.png" style="float:left"/> <span>Feed Fire</span> <img width=25 src="/static/images/fire_icon.png" style="float:right"/></button>
     <br>
 
@@ -12,23 +16,12 @@
         <!--<button class="volumeButton" data-json='{"dir":-1}'>&#8595; Playlist</button><button class="volumeButton" data-json='{"dir":1}'>&#8593; Buy Song</button>-->
         <!-- <div id="currVol">Current Volume: 50</div> -->
         <div id="volume">
-           <button id="down"><img width="40" height="40"src="/static/images/dec_volume.png"/></button>
-           <button id="up"><img width="40" height="40" src="/static/images/inc_volume.png"/></button>
+           <button class="volume-button" data-vol="-1"><img src="/static/images/dec_volume.png"/></button>
+           <button class="volume-button" data-vol="1"><img  src="/static/images/inc_volume.png"/></button>
         </div>
     </div>
 </div>
 
 <script type="text/javascript">
-    $('#down')
-    .button()
-    .click(function() {
-        // up clicked
-    })
-    .next()
-    .button()
-    .click(function() {
-        // down clicked
-    })
-    .parent()
-    .buttonset();
+
 </script>

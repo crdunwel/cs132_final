@@ -3,9 +3,9 @@ $(document).ready(function()
     // connect socket to server
     var socket = io.connect('http://localhost:8080');
 
-    // event to run when connected
     socket.on('connect', function ()
     {
+        // event to run when connected
         socket.emit('connected', '', function (data)
         {
             // TODO get current song info
@@ -15,35 +15,19 @@ $(document).ready(function()
     });
 
     // jquery selectors
-    var $volumeBar = $('#volumeBar');
     var $feedFireButton = $('#feedFireButton');
+    var $volumeButton =  $('.volume-button');
 
-    var sliderTimeout;    // used for timeout of slider so user isn't sending 100's of request to server.
-    $volumeBar.slider({
-        min: 0,
-        max: 100,
-        range:'min',
-        value:50,
-        step:1,
-        slide:function(event,ui)
-        {
-            //$slider_handle.text(ui.value);
-            clearTimeout(sliderTimeout);
-            sliderTimeout = setTimeout(sendVolume, 2000)
-        }
-    });
+    $volumeButton.button();
+    $volumeButton.click(function(event) { sendVolume($(this).data('vol')); });
 
-    var $slider_handle = $('.ui-slider-handle');
-    //$slider_handle.text($volumeBar.slider("value"));
-    $slider_handle.css({'text-decoration':'none','text-align':'center'});
-
-    function sendVolume()
+    function sendVolume(volume)
     {
         navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
 
         function success(position)
         {
-            position.dir = $volumeBar.slider("value");
+            position.dir = volume;
             socket.emit('volume', JSON.stringify(position), function(bool)
             {
                 // TODO do something with returned bool value
@@ -54,7 +38,6 @@ $(document).ready(function()
         {
             // TODO handle case where no GPS present
         }
-
     }
 
     $feedFireButton.click(function()
@@ -73,7 +56,27 @@ $(document).ready(function()
         {
             // TODO handle GPS error
         }
-
     });
 
+    // OLD SLIDER METHOD
+    /*
+     var sliderTimeout;    // used for timeout of slider so user isn't sending 100's of request to server.
+     $volumeBar.slider({
+     min: 0,
+     max: 100,
+     range:'min',
+     value:50,
+     step:1,
+     slide:function(event,ui)
+     {
+     //$slider_handle.text(ui.value);
+     clearTimeout(sliderTimeout);
+     sliderTimeout = setTimeout(sendVolume, 2000)
+     }
+     });
+
+     var $slider_handle = $('.ui-slider-handle');
+     //$slider_handle.text($volumeBar.slider("value"));
+     $slider_handle.css({'text-decoration':'none','text-align':'center'});
+     */
 });

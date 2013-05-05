@@ -1,13 +1,10 @@
 var cookie = require('cookie');
 var connect = require('connect');
 var models = require('./models.js');
-<<<<<<< HEAD
-=======
 
 //used to count number of updates for volume and fire, only update every 5 updates.
 var firecount = 0;
 var volumecount = 0;
->>>>>>> a76c8e26f2c604de8152c85c40f7d18fda62590a
 
 module.exports = function(io)
 {   
@@ -36,14 +33,10 @@ module.exports = function(io)
 
     // bind events to socket
     io.sockets.on('connection', function (client)
-<<<<<<< HEAD
-    {   
-        
-=======
     {
 	
 	//send all speaker and fire data to a tech client
->>>>>>> a76c8e26f2c604de8152c85c40f7d18fda62590a
+
         function sendData(tech)
         {
             var speakers;
@@ -197,28 +190,30 @@ module.exports = function(io)
         // Event to run when volume slider is slid and stays still for certain number of seconds
         client.on('volume', function (msg, fn)
         {
-	    var obj = JSON.parse(msg);
-            console.log(obj);
+	        var obj = JSON.parse(msg);
 
-            // TODO need to first check if user with session ID already exists
+            // insert location object into database
             models.Location.create({client_id:client.id,longitude:obj.coords.longitude,latitude:obj.coords.latitude}).success(function(location)
             {
-		models.Speaker.findAll().success(function(speakers){
-			//person must be within this radius, it's a little larger for volume controls
-			var closest = 0.002;
-			var closestSpeaker = null;
+		        models.Speaker.findAll().success(function(speakers)
+                {
+                    //person must be within this radius, it's a little larger for volume controls
+                    var closest = 0.002;
+                    var closestSpeaker = null;
 
-			for (var i = 0; i < speakers.length; i++){
-				var speaker = speakers[i];
-				var dist = Math.sqrt((location.latitude - speaker.latitude)*(location.latitude - speaker.latitude) + (location.longitude - speaker.longitude)*(location.longitude - speaker.longitude));
-				if (dist < closest){
-					closest = dist;
-					closestSpeaker = speaker;
-				}
+                    for (var i = 0; i < speakers.length; i++){
+                    var speaker = speakers[i];
+                    var dist = Math.sqrt((location.latitude - speaker.latitude)*(location.latitude - speaker.latitude) + (location.longitude - speaker.longitude)*(location.longitude - speaker.longitude));
+                    if (dist < closest){
+                        closest = dist;
+                        closestSpeaker = speaker;
+                    }
 			}
-			if (closestSpeaker){
+			if (closestSpeaker)
+            {
 				//modifies the volume requests for the closest speaker
-				models.Speaker.find(closestSpeaker.id).success(function(f) {
+				models.Speaker.find(closestSpeaker.id).success(function(f)
+                {
 					var up = f.volumeUp;
 					var down = f.volumeDown;
 					if (obj.dir > 0){
@@ -232,7 +227,8 @@ module.exports = function(io)
 					  volumeDown: down
 					}).success(function() {
 						volumecount++;
-						if (volumecount > 4){
+						if (volumecount > 4)
+                        {
 							sendDataToAllTechs();
 							volumecount = 0;
 						}
