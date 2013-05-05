@@ -67,3 +67,7 @@ h3 {
     padding: 3px; }
   #volume img {
     width: 35px; }
+
+#volume {
+  border-top: 1px black solid;
+  border-bottom: 1px black solid; }
