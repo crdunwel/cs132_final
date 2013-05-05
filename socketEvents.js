@@ -7,7 +7,7 @@ var firecount = 0;
 var volumecount = 0;
 
 // Number of seconds between user clicks registering as data.  Used to prevent spamming of clicks.
-var reclickTimer = 10;
+var reclickTimer = 1;
 
 module.exports = function(io)
 {   
