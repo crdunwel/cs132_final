@@ -3,9 +3,8 @@ var markers = new Array();
 var map;
 var viewFires = true;
 var socket = io.connect();
-var fireThreshold = 50;
-var speakerThresholdUp = 100;
-var speakerThresholdDown = -100;
+var fireThreshold;
+var speakerThreshold;
 socket.emit("techConnect");
 
 function initialize() {
@@ -50,9 +49,25 @@ function initialize() {
 		}
 	};
 	var thresholdButton = document.getElementById("changeThreshold");
-	thresholdbutton.onclick = function(e){
+	thresholdButton.onclick = function(e){
 		if(viewFires){
-			
+			var possibleThreshold = prompt("Choose a new fire threshold");
+			var intRegex = /^\d+$/;
+			if(intRegex.test(possibleThreshold)){
+				socket.emit('updateFireThreshold', possibleThreshold);
+			}else{
+				if(possibleThreshold!=null)
+					alert("Fire threshold not set. Threshold must be a non-negative integer");
+			}
+		}else{
+			var possibleThreshold = prompt("Choose a new voume threshold");
+			var intRegex = /^\d+$/;
+			if(intRegex.test(possibleThreshold)){
+				socket.emit('updateSpeakerThreshold', possibleThreshold);
+			}else{
+				if(possibleThreshold!=null)
+					alert("Volume threshold not set. Threshold must be a non-negative integer");
+			}
 		}
 	}
 	socket.on('data', function (data)
@@ -73,6 +88,11 @@ function initialize() {
 			}
 		}
 	});
+	socket.on('updateThreshold', function(fireThresh, speakerThresh){	
+		fireThreshold = fireThresh;
+		speakerThreshold = speakerThresh;
+		console.log("update threshold " + fireThresh + " " + speakerThresh);
+	});
 }
 
 initialize();
@@ -88,7 +108,7 @@ function resetMarkers(){
 function createSpeakerMarker(speaker){
 	var myLatLng = new google.maps.LatLng(speaker.latitude, speaker.longitude);
 	var icon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
-	if (speaker.volumeUp - speaker.volumeDown > speakerThresholdUp || speaker.volumeUp - speaker.volumeDown < speakerThresholdDown){
+	if (speaker.volumeUp - speaker.volumeDown > speakerThreshold || speaker.volumeUp - speaker.volumeDown < -speakerThreshold){
 		icon = 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
 	}
 	var speakerMarker = new google.maps.Marker({

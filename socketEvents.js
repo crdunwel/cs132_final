@@ -1,9 +1,11 @@
 var cookie = require('cookie');
 var connect = require('connect');
-//var models = require('./models.js');
+var models = require('./models.js');
 
 module.exports = function(io)
-{
+{   
+    var fireThreshold= 50;
+    var speakerThreshold = 100;
     // Authorize web socket from session id
     io.set('authorization', function (handshakeData, accept)
     {
@@ -27,12 +29,13 @@ module.exports = function(io)
 
     // bind events to socket
     io.sockets.on('connection', function (client)
-    {
-
+    {   
+        
         function sendData(tech)
         {
             var speakers;
             var fires;
+            tech.emit("updateThreshold", fireThreshold, speakerThreshold);
             models.Speaker.findAll().success(function(s) {
                 speakers = s;
                 models.Fire.findAll().success(function(f) {
@@ -47,6 +50,7 @@ module.exports = function(io)
         {
             var speakers;
             var fires;
+            io.sockets.in("techClients").emit("updateThreshold", fireThreshold, speakerThreshold);
             models.Speaker.findAll().success(function(s) {
                 speakers = s;
                 models.Fire.findAll().success(function(f) {
@@ -108,8 +112,16 @@ module.exports = function(io)
         client.on('removeFire', function(fire){
             models.Fire.find(fire.id).success(function(f){if (f) {f.destroy(); sendData(client);}});
         });
-
-
+        client.on('updateFireThreshold', function(threshold){
+            fireThreshold = threshold;
+            console.log("HERE " + fireThreshold);
+            io.sockets.in("techClients").emit("updateThreshold", fireThreshold, speakerThreshold);
+        });
+        client.on('updateSpeakerThreshold', function(threshold){
+             speakerThreshold=threshold;
+             io.sockets.in("techClients").emit("updateThreshold", fireThreshold, speakerThreshold);
+        });
+           
         // Event to run user first connects
         client.on('connected', function (name, fn)
         {
