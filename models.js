@@ -16,6 +16,16 @@ var sequelize = new Sequelize('database', null, null,
 ////////////////////////
 // DEFINE MODELS HERE //
 ////////////////////////
+var Song = sequelize.define('Song', 
+    {
+        id: { type: Sequelize.INTEGER, autoIncrement: true },
+       	artist: Sequelize.STRING,
+	title: Sequelize.STRING,
+	album: Sequelize.STRING,
+        playlength: Sequelize.FLOAT
+    }
+);
+
 var Location = sequelize.define('Location',
     {
         id: { type: Sequelize.INTEGER, autoIncrement: true },
@@ -77,9 +87,12 @@ sequelize.sync({force: true}).success(function()
     {
         Fire.create({needsFed:50,latitude:firesObj[i].latitude,longitude:firesObj[i].longitude});
     }
+
+	Song.create({title: "Thrift Shop", artist: "Macklemore", playlength:"4.0", album : "who knows"});
 });
 
 // export for use in other modules
+exports.Song = Song;
 exports.Location = Location;
 exports.FeedFire = FeedFire;
 exports.Volume = Volume;

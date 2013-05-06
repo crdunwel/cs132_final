@@ -6,6 +6,10 @@ var models = require('./models.js');
 var firecount = 0;
 var volumecount = 0;
 
+var currSong = 0;
+
+//TODO: RSS feed
+
 module.exports = function(io)
 {
     // Authorize web socket from session id
@@ -128,6 +132,10 @@ module.exports = function(io)
         {
             console.log(client.id);
             // TODO get song info from database
+	    models.Song.find(currSong).success(function(song){
+			if (song){fn(song);}
+		});
+	    
         });
 
         // Event to run when feed fire button is clicked

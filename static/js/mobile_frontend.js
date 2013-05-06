@@ -1,7 +1,7 @@
 $(document).ready(function()
 {
     // connect socket to server
-    var socket = io.connect('http://localhost:8080');
+    var socket = io.connect();
 
     // event to run when connected
     socket.on('connect', function ()
@@ -9,10 +9,21 @@ $(document).ready(function()
         socket.emit('connected', '', function (data)
         {
             // TODO get current song info
-            var obj = JSON.parse(data);
-            console.log(obj);
+            //var obj = JSON.parse(data);
+            //console.log(obj);
+
+		document.getElementById('songTitle').innerHTML = data.title;
+		document.getElementById('songArtist').innerHTML = data.artist;
+		
         });
     });
+
+	socket.on('songUpdate', function(song){
+		// TODO get current song info
+
+		document.getElementById('songTitle').innerHTML = song.title;
+		document.getElementById('songArtist').innerHTML = song.artist;
+	});
 
     // jquery selectors
     var $volumeBar = $('#volumeBar');
