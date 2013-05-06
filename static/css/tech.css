@@ -8,7 +8,7 @@ html{
 	display:inline-block;
 }
 
-#toggleView{
+#toggleView, #changeThreshold{
 	width: 150px;
 	height: 30px;
 }

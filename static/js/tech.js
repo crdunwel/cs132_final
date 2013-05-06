@@ -7,7 +7,8 @@ var map;
 var viewFires = true;
 var selected = -1;
 var socket = io.connect();
-
+var fireThreshold;
+var speakerThreshold;
 socket.emit("techConnect");
 
 function initialize() {
@@ -49,10 +50,34 @@ function initialize() {
 			document.getElementById("speakerinfopane").style.display = "block";
 		}
 	};
+	var thresholdButton = document.getElementById("changeThreshold");
+	thresholdButton.onclick = function(e){
+		if(viewFires){
+			var possibleThreshold = prompt("Current Threshold: " + fireThreshold + "\n" +"Choose a new fire threshold");
+			var intRegex = /^\d+$/;
+			if(intRegex.test(possibleThreshold)){
+				socket.emit('updateFireThreshold', possibleThreshold);
+			}else{
+				if(possibleThreshold!=null)
+					alert("Fire threshold not set. Threshold must be a non-negative integer");
+			}
+		}else{
+			var possibleThreshold = prompt("Current Threshold: " + speakerThreshold + "\n" + "Enter a new volume threshold");
+			var intRegex = /^\d+$/;
+			if(intRegex.test(possibleThreshold)){
+				socket.emit('updateSpeakerThreshold', possibleThreshold);
+			}else{
+				if(possibleThreshold!=null)
+					alert("Volume threshold not set. Threshold must be a non-negative integer");
+			}
+		}
+	}
+
 
 	//receiving data from server
 	//clear markers and recreate them
 	socket.on('data', function (data){
+
 		resetMarkers();
 		if (viewFires){
 			var selectedFire = null;
@@ -105,6 +130,11 @@ function initialize() {
 			}
 		}
 	});
+	socket.on('updateThreshold', function(fireThresh, speakerThresh){	
+		fireThreshold = fireThresh;
+		speakerThreshold = speakerThresh;
+		console.log("update threshold " + fireThresh + " " + speakerThresh);
+	});
 }
 
 initialize();
@@ -115,13 +145,13 @@ function resetMarkers(){
     	{
 		markers[i].setMap(null);
 	}
-	markers = new Array();
+	markers = [];
 }
 
 function createSpeakerMarker(speaker){
 	var myLatLng = new google.maps.LatLng(speaker.latitude, speaker.longitude);
 	var icon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
-	if (speaker.volumeUp - speaker.volumeDown > 100 || speaker.volumeUp - speaker.volumeDown < -100){
+	if (speaker.volumeUp - speaker.volumeDown > speakerThreshold || speaker.volumeUp - speaker.volumeDown < -speakerThreshold){
 		icon = 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
 	}
 	var speakerMarker = new google.maps.Marker({
@@ -135,7 +165,7 @@ function createSpeakerMarker(speaker){
 	(function (_speaker) {
 		google.maps.event.addListener(speakerMarker, 'click', function(){
 			var infopane = document.getElementById("speakerinfopane");
-			infopane.innerHTML = "<h3>Speaker Information for:</h3>"
+			infopane.innerHTML = "<h3>Speaker Information for:</h3>";
 			infopane.innerHTML += "<p>ID: " + _speaker.id + "</p>";
 			infopane.innerHTML += "<p>Volume Up Requests: " + _speaker.volumeUp + "</p>";
 			infopane.innerHTML += "<p>Volume Down Requests: " + _speaker.volumeDown + "</p>";
@@ -162,7 +192,7 @@ function createSpeakerMarker(speaker){
 function createFireMarker(fire){
 	var myLatLng = new google.maps.LatLng(fire.latitude, fire.longitude);
 	var icon = 'http://maps.google.com/mapfiles/ms/icons/orange-dot.png'
-	if (fire.needsFed > 50){
+	if (fire.needsFed > fireThreshold){
 		icon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
 	}
 	var fireMarker = new google.maps.Marker({
